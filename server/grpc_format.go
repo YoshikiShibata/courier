@@ -19,24 +19,24 @@ import (
     "google.golang.org/grpc"
 
     v1 "github.com/x-asia/api-go/%s"
-    "github.com/x-asia/kauche-app/lib/go/e2eframework/fakeserver"
+	"github.com/YoshikiShibata/courier/server"
 )
 `
 	prepareFmt = `
 type fake%[1]sServerImpl struct {
     v1.%[1]sServer
-    srvStub *fakeserver.ServerStub
+    srvStub *server.ServerStub
 }
 
 type %[1]sServer struct {
     impl    *fake%[1]sServerImpl
-    srvStub *fakeserver.ServerStub
+    srvStub *server.ServerStub
 }
 
 func New%[1]sServer(
     grpcServer *grpc.Server,
 ) *%[1]sServer {
-    srvStub := &fakeserver.ServerStub{}
+    srvStub := &server.ServerStub{}
     srvImpl := &fake%[1]sServerImpl{
         srvStub: srvStub,
     }
@@ -60,7 +60,7 @@ func (s *fake%[1]sServerImpl) %[2]s(
     ctx context.Context,
     req %[3]s,
 ) (%[4]s, error) {
-    return fakeserver.HandleRequest[%[5]s](s.srvStub, ctx, "%[2]s", req)
+    return server.HandleRequest[%[5]s](s.srvStub, ctx, "%[2]s", req)
 }
 
 func (s *%[1]sServer) Set%[2]sResponse(
