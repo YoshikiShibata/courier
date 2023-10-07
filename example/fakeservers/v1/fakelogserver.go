@@ -7,8 +7,8 @@ import (
 
 	"google.golang.org/grpc"
 
+	log_v1 "github.com/YoshikiShibata/courier/example/api/v1"
 	"github.com/YoshikiShibata/courier/server"
-	log_v1 "github.com/YoshikiShibata/example/api/v1"
 )
 
 type fakeLogServerImpl struct {
