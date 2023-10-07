@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/x-asia/kauche-app/lib/go/e2eframework/tid"
+	"github.com/YoshikiShibata/courier/tid"
 )
 
 type responseInfo struct {
@@ -90,12 +90,14 @@ func HandleRequest[R any](
 	ctx context.Context,
 	rpcName string,
 	req any,
-) (*R, error) {
+) (R, error) {
+	var zeroValue R
+
 	res, err := ss.HandleRequest(ctx, rpcName, req)
 	if err != nil {
-		return nil, err
+		return zeroValue, err
 	}
-	return res.(*R), nil
+	return res.(R), nil
 }
 
 // HandleRequest is a method to handle requestes.

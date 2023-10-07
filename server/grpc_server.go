@@ -47,7 +47,7 @@ func (gs *GRPCServer) Server() *grpc.Server {
 
 // Serve starts the gRPC server.
 func (gs *GRPCServer) Serve() {
-	err := gs.server.Serve(fs.listener)
+	err := gs.server.Serve(gs.listener)
 	if err != nil {
 		log.Fatalf("gs.server.Serve failed: %v", err)
 	}

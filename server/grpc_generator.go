@@ -3,11 +3,13 @@
 package server
 
 import (
-	"fmt"
+	"html/template"
+	"log"
+	"os"
 	"reflect"
 )
 
-type rpcMethod struct {
+type RPCMethod struct {
 	Name        string
 	ReqTypeName string
 	ResTypeName string
@@ -20,32 +22,30 @@ type TemplateConfig struct {
 	ProtoPackageImportName string // Import Name
 	ServiceName            string
 	ServiceClientType      reflect.Type
+	Methods                []*RPCMethod
 }
 
 // Generate generates a fake server code to stdout.
 func Generate(config *TemplateConfig) {
-	rpcMethods := make([]*rpcMethod, 0, config.ServiceClientType.NumMethod())
+	rpcMethods := make([]*RPCMethod, 0, config.ServiceClientType.NumMethod())
 	for i := 0; i < config.ServiceClientType.NumMethod(); i++ {
 		method := config.ServiceClientType.Method(i)
 		methodType := method.Type
-		rpcMethods = append(rpcMethods, &rpcMethod{
+		rpcMethods = append(rpcMethods, &RPCMethod{
 			Name:        method.Name,
 			ReqTypeName: methodType.In(2).String(),
 			ResTypeName: methodType.Out(0).String(),
 		})
 	}
 
-	fmt.Printf(packageFmt, config.ServerPackageName)
-	fmt.Printf(importFmt, config.ProtoPackageImportPath)
-	fmt.Printf(prepareFmt, config.ServiceName)
+	config.Methods = rpcMethods
 
-	for _, method := range rpcMethods {
-		fmt.Printf(methodFmt,
-			config.ServiceName,     // [1]
-			method.Name,            // [2]
-			method.ReqTypeName,     // [3]
-			method.ResTypeName,     // [4]
-			method.ResTypeName[1:], // [5]
-		)
+	fakeserver, err := template.New("fakeserver").Parse(fakeServerTemplate)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := fakeserver.Execute(os.Stdout, config); err != nil {
+		log.Fatal(err)
 	}
 }

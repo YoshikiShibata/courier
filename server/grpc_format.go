@@ -3,86 +3,78 @@
 package server
 
 // This file contains formats to generate a fake server.
+const fakeServerTemplate = `// This code is auto-generated. DO NOT EDIT.
 
-const (
-	packageFmt = `// This code is auto-generated. DO NOT EDIT.
+package {{.ServerPackageName}}
 
-// Copyright © 2023 Yoshiki Shibata. All rights reserved.
-
-package %s
-`
-
-	importFmt = `
 import (
     "context"
 
     "google.golang.org/grpc"
 
-    v1 "github.com/x-asia/api-go/%s"
+	{{.ProtoPackageImportName}} "{{.ProtoPackageImportPath}}"
 	"github.com/YoshikiShibata/courier/server"
 )
-`
-	prepareFmt = `
-type fake%[1]sServerImpl struct {
-    v1.%[1]sServer
+
+type fake{{.ServiceName}}ServerImpl struct {
+	{{.ProtoPackageImportName}}.{{.ServiceName}}Server
     srvStub *server.ServerStub
 }
 
-type %[1]sServer struct {
-    impl    *fake%[1]sServerImpl
+type {{.ServiceName}}Server struct {
+    impl    *fake{{.ServiceName}}ServerImpl
     srvStub *server.ServerStub
 }
 
-func New%[1]sServer(
+func New{{.ServiceName}}Server(
     grpcServer *grpc.Server,
-) *%[1]sServer {
+) *{{.ServiceName}}Server {
     srvStub := &server.ServerStub{}
-    srvImpl := &fake%[1]sServerImpl{
+    srvImpl := &fake{{.ServiceName}}ServerImpl{
         srvStub: srvStub,
     }
-    v1.Register%[1]sServer(grpcServer, srvImpl)
-    return &%[1]sServer{
+	{{.ProtoPackageImportName}}.Register{{.ServiceName}}Server(grpcServer, srvImpl)
+    return &{{.ServiceName}}Server{
         impl:    srvImpl,
         srvStub: srvStub,
     }
 }
 
-func (s *%[1]sServer) ClearAllResponses(
+func (s *{{.ServiceName}}Server) ClearAllResponses(
     tid string,
 ) {
     s.srvStub.ClearAllResponses(tid)
 }
 
-`
+{{range .Methods}}
 
-	methodFmt = `
-func (s *fake%[1]sServerImpl) %[2]s(
+func (s *fake{{$.ServiceName}}ServerImpl) {{.Name}}(
     ctx context.Context,
-    req %[3]s,
-) (%[4]s, error) {
-    return server.HandleRequest[%[5]s](s.srvStub, ctx, "%[2]s", req)
+    req {{.ReqTypeName}},
+) ({{.ResTypeName}}, error) {
+    return server.HandleRequest[{{.ResTypeName}}](s.srvStub, ctx, "{{.Name}}", req)
 }
 
-func (s *%[1]sServer) Set%[2]sResponse(
+func (s *{{$.ServiceName}}Server) Set{{.Name}}Response(
     tid string,
-    res %[4]s,
+    res {{.ResTypeName}},
     err error,
 ) {
-    s.srvStub.SetResponse(tid, "%[2]s", res, err)
+    s.srvStub.SetResponse(tid, "{{.Name}}", res, err)
 }
 
-func (s *%[1]sServer) Set%[2]sResponseCreator(
+func (s *{{$.ServiceName}}Server) Set{{.Name}}ResponseCreator(
     tid string,
-    creator func(ctx context.Context, req %[3]s) (%[4]s, error)) {
+    creator func(ctx context.Context, req {{.ReqTypeName}}) ({{.ResTypeName}}, error)) {
 
     s.srvStub.SetResponseCreator(
-        tid, "%[2]s",
+        tid, "{{.Name}}",
         func(ctx context.Context, req any) (any, error) {
-            res, err := creator(ctx, req.(%[3]s))
+            res, err := creator(ctx, req.({{.ReqTypeName}}))
             return res, err
         },
     )
 }
 
+{{end}}
 `
-)
