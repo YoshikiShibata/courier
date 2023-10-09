@@ -43,14 +43,14 @@ func (s *WarehouseServer) ClearAllResponses(
 
 func (s *fakeWarehouseServerImpl) ListProducts(
 	ctx context.Context,
-	req *warehouse_v1.ListProductsRequest,
-) (*warehouse_v1.ListProductsResponse, error) {
-	return server.HandleRequest[*warehouse_v1.ListProductsResponse](s.srvStub, ctx, "ListProducts", req)
+	req *v1.ListProductsRequest,
+) (*v1.ListProductsResponse, error) {
+	return server.HandleRequest[*v1.ListProductsResponse](s.srvStub, ctx, "ListProducts", req)
 }
 
 func (s *WarehouseServer) SetListProductsResponse(
 	tid string,
-	res *warehouse_v1.ListProductsResponse,
+	res *v1.ListProductsResponse,
 	err error,
 ) {
 	s.srvStub.SetResponse(tid, "ListProducts", res, err)
@@ -58,12 +58,12 @@ func (s *WarehouseServer) SetListProductsResponse(
 
 func (s *WarehouseServer) SetListProductsResponseCreator(
 	tid string,
-	creator func(ctx context.Context, req *warehouse_v1.ListProductsRequest) (*warehouse_v1.ListProductsResponse, error)) {
+	creator func(ctx context.Context, req *v1.ListProductsRequest) (*v1.ListProductsResponse, error)) {
 
 	s.srvStub.SetResponseCreator(
 		tid, "ListProducts",
 		func(ctx context.Context, req any) (any, error) {
-			res, err := creator(ctx, req.(*warehouse_v1.ListProductsRequest))
+			res, err := creator(ctx, req.(*v1.ListProductsRequest))
 			return res, err
 		},
 	)
@@ -71,14 +71,14 @@ func (s *WarehouseServer) SetListProductsResponseCreator(
 
 func (s *fakeWarehouseServerImpl) ShipProduct(
 	ctx context.Context,
-	req *warehouse_v1.ShipProductRequest,
-) (*warehouse_v1.ShipProductResponse, error) {
-	return server.HandleRequest[*warehouse_v1.ShipProductResponse](s.srvStub, ctx, "ShipProduct", req)
+	req *v1.ShipProductRequest,
+) (*v1.ShipProductResponse, error) {
+	return server.HandleRequest[*v1.ShipProductResponse](s.srvStub, ctx, "ShipProduct", req)
 }
 
 func (s *WarehouseServer) SetShipProductResponse(
 	tid string,
-	res *warehouse_v1.ShipProductResponse,
+	res *v1.ShipProductResponse,
 	err error,
 ) {
 	s.srvStub.SetResponse(tid, "ShipProduct", res, err)
@@ -86,12 +86,12 @@ func (s *WarehouseServer) SetShipProductResponse(
 
 func (s *WarehouseServer) SetShipProductResponseCreator(
 	tid string,
-	creator func(ctx context.Context, req *warehouse_v1.ShipProductRequest) (*warehouse_v1.ShipProductResponse, error)) {
+	creator func(ctx context.Context, req *v1.ShipProductRequest) (*v1.ShipProductResponse, error)) {
 
 	s.srvStub.SetResponseCreator(
 		tid, "ShipProduct",
 		func(ctx context.Context, req any) (any, error) {
-			res, err := creator(ctx, req.(*warehouse_v1.ShipProductRequest))
+			res, err := creator(ctx, req.(*v1.ShipProductRequest))
 			return res, err
 		},
 	)

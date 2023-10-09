@@ -7,12 +7,12 @@ import (
 
 	"google.golang.org/grpc"
 
-	shipping_v1 "github.com/YoshikiShibata/courier/example/api/shipping_v1"
+	v1 "github.com/YoshikiShibata/courier/example/api/shipping_v1"
 	"github.com/YoshikiShibata/courier/server"
 )
 
 type fakeShippingServerImpl struct {
-	shipping_v1.ShippingServer
+	v1.ShippingServer
 	srvStub *server.ServerStub
 }
 
@@ -28,7 +28,7 @@ func NewShippingServer(
 	srvImpl := &fakeShippingServerImpl{
 		srvStub: srvStub,
 	}
-	shipping_v1.RegisterShippingServer(grpcServer, srvImpl)
+	v1.RegisterShippingServer(grpcServer, srvImpl)
 	return &ShippingServer{
 		impl:    srvImpl,
 		srvStub: srvStub,
@@ -43,14 +43,14 @@ func (s *ShippingServer) ClearAllResponses(
 
 func (s *fakeShippingServerImpl) Create(
 	ctx context.Context,
-	req *shipping_v1.CreateShippingRequest,
-) (*shipping_v1.CreateShippingResponse, error) {
-	return server.HandleRequest[*shipping_v1.CreateShippingResponse](s.srvStub, ctx, "Create", req)
+	req *v1.CreateShippingRequest,
+) (*v1.CreateShippingResponse, error) {
+	return server.HandleRequest[*v1.CreateShippingResponse](s.srvStub, ctx, "Create", req)
 }
 
 func (s *ShippingServer) SetCreateResponse(
 	tid string,
-	res *shipping_v1.CreateShippingResponse,
+	res *v1.CreateShippingResponse,
 	err error,
 ) {
 	s.srvStub.SetResponse(tid, "Create", res, err)
@@ -58,12 +58,12 @@ func (s *ShippingServer) SetCreateResponse(
 
 func (s *ShippingServer) SetCreateResponseCreator(
 	tid string,
-	creator func(ctx context.Context, req *shipping_v1.CreateShippingRequest) (*shipping_v1.CreateShippingResponse, error)) {
+	creator func(ctx context.Context, req *v1.CreateShippingRequest) (*v1.CreateShippingResponse, error)) {
 
 	s.srvStub.SetResponseCreator(
 		tid, "Create",
 		func(ctx context.Context, req any) (any, error) {
-			res, err := creator(ctx, req.(*shipping_v1.CreateShippingRequest))
+			res, err := creator(ctx, req.(*v1.CreateShippingRequest))
 			return res, err
 		},
 	)
@@ -71,14 +71,14 @@ func (s *ShippingServer) SetCreateResponseCreator(
 
 func (s *fakeShippingServerImpl) Status(
 	ctx context.Context,
-	req *shipping_v1.ShippingStatusRequest,
-) (*shipping_v1.ShippingStatusResponse, error) {
-	return server.HandleRequest[*shipping_v1.ShippingStatusResponse](s.srvStub, ctx, "Status", req)
+	req *v1.ShippingStatusRequest,
+) (*v1.ShippingStatusResponse, error) {
+	return server.HandleRequest[*v1.ShippingStatusResponse](s.srvStub, ctx, "Status", req)
 }
 
 func (s *ShippingServer) SetStatusResponse(
 	tid string,
-	res *shipping_v1.ShippingStatusResponse,
+	res *v1.ShippingStatusResponse,
 	err error,
 ) {
 	s.srvStub.SetResponse(tid, "Status", res, err)
@@ -86,12 +86,12 @@ func (s *ShippingServer) SetStatusResponse(
 
 func (s *ShippingServer) SetStatusResponseCreator(
 	tid string,
-	creator func(ctx context.Context, req *shipping_v1.ShippingStatusRequest) (*shipping_v1.ShippingStatusResponse, error)) {
+	creator func(ctx context.Context, req *v1.ShippingStatusRequest) (*v1.ShippingStatusResponse, error)) {
 
 	s.srvStub.SetResponseCreator(
 		tid, "Status",
 		func(ctx context.Context, req any) (any, error) {
-			res, err := creator(ctx, req.(*shipping_v1.ShippingStatusRequest))
+			res, err := creator(ctx, req.(*v1.ShippingStatusRequest))
 			return res, err
 		},
 	)
