@@ -1,9 +1,9 @@
 compile:
-	protoc api/v1/*.proto \
-		--go_out=. \
-		--go-grpc_out=. \
-		--go_opt=paths=source_relative \
-		--go-grpc_opt=paths=source_relative \
+	protoc proto/*/v1//*.proto \
+		--go_out=./api \
+		--go-grpc_out=./api \
+		--go_opt=paths=import \
+		--go-grpc_opt=paths=import \
 		--proto_path=.
 
 genfakes:
