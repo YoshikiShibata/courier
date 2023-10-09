@@ -11,9 +11,9 @@ import (
     "context"
 
     "google.golang.org/grpc"
+	"github.com/YoshikiShibata/courier/server"
 
 	{{.ProtoPackageImportName}} "{{.ProtoPackageImportPath}}"
-	"github.com/YoshikiShibata/courier/server"
 )
 
 type fake{{.ServiceName}}ServerImpl struct {
@@ -23,7 +23,7 @@ type fake{{.ServiceName}}ServerImpl struct {
 
 type {{.ServiceName}}Server struct {
     impl    *fake{{.ServiceName}}ServerImpl
-    srvStub *server.ServerStub
+    srvStub *server.GRPCServerStub
 }
 
 func New{{.ServiceName}}Server(
