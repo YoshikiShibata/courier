@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "/warehouse_v1" ;
+
+service Warehouse {
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse){}
+  rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse){}
+}
+
+message ListProductsRequest {
+}
+
+message ListProductsResponse {
+}
+
+message ShipProductRequest {
+}
+
+message ShipProductResponse {
+}
