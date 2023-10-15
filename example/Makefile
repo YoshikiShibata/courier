@@ -15,4 +15,4 @@ genfakes:
 build:
 	rm -fr coverage
 	mkdir coverage
-	go build -cover -o bin/shop_server -coverpkg=github.com/YoshikiShibata/courier/example,github.com/YoshikiShibata/courier/example/internal/... .
+	go build -race -cover -o bin/shop_server -coverpkg=github.com/YoshikiShibata/courier/example,github.com/YoshikiShibata/courier/example/internal/... .
