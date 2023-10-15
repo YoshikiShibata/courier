@@ -1,6 +1,6 @@
 // Copyright © Yoshiki Shibata, Inc. All rights reserved.
 
-package server
+package fakegrpc
 
 import (
 	"context"
@@ -17,15 +17,15 @@ type responseInfo struct {
 	creator ResponseCreator
 }
 
-// ServerStub provides basic primitives for a fake server.
-type ServerStub struct {
+// GRPCServerStub provides basic primitives for a fake gRPC server.
+type GRPCServerStub struct {
 	mutex     sync.Mutex
 	responses map[string]*responseInfo
 }
 
 // SetResponse sets specified response and error for a RPC(rcpName).
 // tid represents Testing ID.
-func (ss *ServerStub) SetResponse(
+func (ss *GRPCServerStub) SetResponse(
 	tid, rpcName string,
 	response any,
 	err error,
@@ -49,7 +49,7 @@ func (ss *ServerStub) SetResponse(
 type ResponseCreator func(ctx context.Context, req any) (response any, err error)
 
 // SetResponseCreator sets a creator for a RPC.
-func (ss *ServerStub) SetResponseCreator(
+func (ss *GRPCServerStub) SetResponseCreator(
 	tid, rpcName string,
 	creator ResponseCreator,
 ) {
@@ -69,7 +69,7 @@ func (ss *ServerStub) SetResponseCreator(
 }
 
 // ClearAllResponses clear all responsed and errors for tid.
-func (ss *ServerStub) ClearAllResponses(
+func (ss *GRPCServerStub) ClearAllResponses(
 	tid string,
 ) {
 	ss.mutex.Lock()
@@ -86,7 +86,7 @@ func (ss *ServerStub) ClearAllResponses(
 
 // HandleRequest is a generic function to handle requests.
 func HandleRequest[R any](
-	ss *ServerStub,
+	ss *GRPCServerStub,
 	ctx context.Context,
 	rpcName string,
 	req any,
@@ -101,7 +101,7 @@ func HandleRequest[R any](
 }
 
 // HandleRequest is a method to handle requestes.
-func (ss *ServerStub) HandleRequest(
+func (ss *GRPCServerStub) HandleRequest(
 	ctx context.Context,
 	rpcName string,
 	req any,

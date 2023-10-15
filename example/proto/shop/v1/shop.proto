@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "/shop_v1";
+
+service Shop {
+  rpc ListProducts(ListProductRequest) returns (ListProductResponse){}
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse){}
+  rpc GetOrderStatus(GetOrderStatusRequest) returns (GetOrderStatusResponse) {}
+}
+
+message ListProductRequest {
+}
+
+message ListProductResponse {
+}
+
+message GetProductRequest {
+}
+
+message GetProductResponse {
+}
+
+message CreateOrderRequest {
+}
+
+
+message CreateOrderResponse {
+}
+
+message GetOrderStatusRequest {
+}
+
+message GetOrderStatusResponse {
+}

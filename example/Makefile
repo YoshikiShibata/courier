@@ -1,11 +1,16 @@
 compile:
-	protoc api/v1/*.proto \
-		--go_out=. \
-		--go-grpc_out=. \
-		--go_opt=paths=source_relative \
-		--go-grpc_opt=paths=source_relative \
+	protoc proto/*/v1//*.proto \
+		--go_out=./api \
+		--go-grpc_out=./api \
+		--go_opt=paths=import \
+		--go-grpc_opt=paths=import \
 		--proto_path=.
 
 genfakes:
-	go run cmd/logserver/main.go > fakeservers/v1/fakelogserver.go
-	gofmt -w fakeservers/v1/fakelogserver.go
+	go run scripts/shipping_v1/main.go > fakeservers/shipping_v1/server.go
+	gofmt -w fakeservers/shipping_v1/server.go
+	go run scripts/warehouse_v1/main.go > fakeservers/warehouse_v1/server.go
+	gofmt -w fakeservers/warehouse_v1/server.go
+
+build:
+	go build -o bin/shop_server

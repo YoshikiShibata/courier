@@ -1,6 +1,6 @@
 // Copyright © 2023 Yoshiki Shibata. All rights reserved.
 
-package server
+package fakegrpc
 
 // This file contains formats to generate a fake server.
 const fakeServerTemplate = `// This code is auto-generated. DO NOT EDIT.
@@ -11,25 +11,25 @@ import (
     "context"
 
     "google.golang.org/grpc"
+	"github.com/YoshikiShibata/courier/server/fakegrpc"
 
 	{{.ProtoPackageImportName}} "{{.ProtoPackageImportPath}}"
-	"github.com/YoshikiShibata/courier/server"
 )
 
 type fake{{.ServiceName}}ServerImpl struct {
 	{{.ProtoPackageImportName}}.{{.ServiceName}}Server
-    srvStub *server.ServerStub
+    srvStub *fakegrpc.GRPCServerStub
 }
 
 type {{.ServiceName}}Server struct {
     impl    *fake{{.ServiceName}}ServerImpl
-    srvStub *server.ServerStub
+    srvStub *fakegrpc.GRPCServerStub
 }
 
 func New{{.ServiceName}}Server(
     grpcServer *grpc.Server,
 ) *{{.ServiceName}}Server {
-    srvStub := &server.ServerStub{}
+    srvStub := &fakegrpc.GRPCServerStub{}
     srvImpl := &fake{{.ServiceName}}ServerImpl{
         srvStub: srvStub,
     }
@@ -52,7 +52,7 @@ func (s *fake{{$.ServiceName}}ServerImpl) {{.Name}}(
     ctx context.Context,
     req {{.ReqTypeName}},
 ) ({{.ResTypeName}}, error) {
-    return server.HandleRequest[{{.ResTypeName}}](s.srvStub, ctx, "{{.Name}}", req)
+    return fakegrpc.HandleRequest[{{.ResTypeName}}](s.srvStub, ctx, "{{.Name}}", req)
 }
 
 func (s *{{$.ServiceName}}Server) Set{{.Name}}Response(

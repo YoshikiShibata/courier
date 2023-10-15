@@ -1,12 +1,13 @@
 // Copyright © 2023 Yoshiki Shibata. All rights reserved.
 
-package server
+package fakegrpc
 
 import (
 	"html/template"
 	"log"
 	"os"
 	"reflect"
+	"regexp"
 )
 
 type RPCMethod struct {
@@ -27,14 +28,23 @@ type TemplateConfig struct {
 
 // Generate generates a fake server code to stdout.
 func Generate(config *TemplateConfig) {
+	packageNamePattern := regexp.MustCompile(`\*\w+\.`)
+
+	replacePackageName := func(input string) string {
+		output := packageNamePattern.ReplaceAllStringFunc(input, func(match string) string {
+			return "*" + config.ProtoPackageImportName + "."
+		})
+		return output
+	}
+
 	rpcMethods := make([]*RPCMethod, 0, config.ServiceClientType.NumMethod())
 	for i := 0; i < config.ServiceClientType.NumMethod(); i++ {
 		method := config.ServiceClientType.Method(i)
 		methodType := method.Type
 		rpcMethods = append(rpcMethods, &RPCMethod{
 			Name:        method.Name,
-			ReqTypeName: methodType.In(2).String(),
-			ResTypeName: methodType.Out(0).String(),
+			ReqTypeName: replacePackageName(methodType.In(2).String()),
+			ResTypeName: replacePackageName(methodType.Out(0).String()),
 		})
 	}
 
