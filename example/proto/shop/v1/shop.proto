@@ -1,18 +1,20 @@
 syntax = "proto3";
 
+package yoshikishibata.courier.example.api.shop.v1;
+
 option go_package = "/shop_v1";
 
 service Shop {
-  rpc ListProducts(ListProductRequest) returns (ListProductResponse){}
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse){}
   rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse){}
   rpc GetOrderStatus(GetOrderStatusRequest) returns (GetOrderStatusResponse) {}
 }
 
-message ListProductRequest {
+message ListProductsRequest {
 }
 
-message ListProductResponse {
+message ListProductsResponse {
 }
 
 message GetProductRequest {

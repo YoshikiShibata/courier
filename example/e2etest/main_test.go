@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/YoshikiShibata/courier/server/fakegrpc"
+	"github.com/travisjeffery/go-dynaport"
 
 	"github.com/YoshikiShibata/courier"
 	fakeshipping_v1 "github.com/YoshikiShibata/courier/example/fakeservers/shipping_v1"
@@ -28,15 +29,20 @@ func TestMain(m *testing.M) {
 var (
 	fakeShippingServer  *fakeshipping_v1.ShippingServer
 	fakeWarehouseServer *fakewarehouse_v1.WarehouseServer
+	shopGRPCPort        int
 )
 
 func e2eCoverage(m *testing.M) (exitCode int) {
+	ports := dynaport.Get(1)
+	shopGRPCPort = ports[0]
+	log.Printf("GRPC Port for Shop service is %d", shopGRPCPort)
+
 	config := &courier.Config{
 		MakeDir:           "..",
 		MakeBuildTarget:   "build",
 		ServiceBinaryPath: "bin/shop_server",
 		ServiceName:       "Shop",
-		GRPCPort:          5000,
+		GRPCPort:          shopGRPCPort,
 		Verbose:           testing.Verbose(),
 		CoverageDir:       "coverage",
 	}

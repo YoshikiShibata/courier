@@ -13,6 +13,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
+	github.com/travisjeffery/go-dynaport v1.0.0 // indirect
 	github.com/x-asia/api-go v0.0.0-20231006123429-e43eded97167 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

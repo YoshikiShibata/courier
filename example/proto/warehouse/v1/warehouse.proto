@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package yoshikishibata.courier.example.api.warehouse.v1;
+
 option go_package = "/warehouse_v1" ;
 
 service Warehouse {
