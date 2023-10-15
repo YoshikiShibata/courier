@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package yoshikishibata.courier.example.api.shipping.v1;
+
 option go_package = "/shipping_v1";
 
 service Shipping {

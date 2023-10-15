@@ -12,8 +12,10 @@ import (
 	"github.com/YoshikiShibata/courier/example/api/warehouse_v1"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/status"
 )
 
 type GRPCServer struct {
@@ -83,30 +85,28 @@ func newShopServer(
 
 func (s *shopServer) ListProducts(
 	ctx context.Context,
-	req *shop_v1.ListProductRequest,
-) (*shop_v1.ListProductResponse, error) {
-
-	return nil, nil
+	req *shop_v1.ListProductsRequest,
+) (*shop_v1.ListProductsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }
 
 func (s *shopServer) GetProduct(
 	ctx context.Context,
 	req *shop_v1.GetProductRequest,
 ) (*shop_v1.GetProductResponse, error) {
-
-	return nil, nil
+	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }
 
 func (s *shopServer) CreateOrder(
 	ctx context.Context,
 	req *shop_v1.CreateOrderRequest,
 ) (*shop_v1.CreateOrderResponse, error) {
-	return nil, nil
+	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }
 
 func (s *shopServer) GetOrderStatus(
 	ctx context.Context,
 	req *shop_v1.GetOrderStatusRequest,
 ) (*shop_v1.GetOrderStatusResponse, error) {
-	return nil, nil
+	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }
