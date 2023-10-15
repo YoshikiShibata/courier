@@ -12,5 +12,6 @@ genfakes:
 	go run scripts/warehouse_v1/main.go > fakeservers/warehouse_v1/server.go
 	gofmt -w fakeservers/warehouse_v1/server.go
 
-build:
+run:
 	go build -o bin/shop_server
+	bin/shop_server
