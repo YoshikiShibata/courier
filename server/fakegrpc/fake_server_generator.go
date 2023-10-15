@@ -1,6 +1,6 @@
 // Copyright © 2023 Yoshiki Shibata. All rights reserved.
 
-package grpc
+package fakegrpc
 
 import (
 	"html/template"

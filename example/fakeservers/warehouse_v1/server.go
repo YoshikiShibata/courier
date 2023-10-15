@@ -5,26 +5,26 @@ package fakewarehouse_v1
 import (
 	"context"
 
+	"github.com/YoshikiShibata/courier/server/fakegrpc"
 	"google.golang.org/grpc"
 
 	v1 "github.com/YoshikiShibata/courier/example/api/warehouse_v1"
-	"github.com/YoshikiShibata/courier/server"
 )
 
 type fakeWarehouseServerImpl struct {
 	v1.WarehouseServer
-	srvStub *server.ServerStub
+	srvStub *fakegrpc.GRPCServerStub
 }
 
 type WarehouseServer struct {
 	impl    *fakeWarehouseServerImpl
-	srvStub *server.ServerStub
+	srvStub *fakegrpc.GRPCServerStub
 }
 
 func NewWarehouseServer(
 	grpcServer *grpc.Server,
 ) *WarehouseServer {
-	srvStub := &server.ServerStub{}
+	srvStub := &fakegrpc.GRPCServerStub{}
 	srvImpl := &fakeWarehouseServerImpl{
 		srvStub: srvStub,
 	}
@@ -45,7 +45,7 @@ func (s *fakeWarehouseServerImpl) ListProducts(
 	ctx context.Context,
 	req *v1.ListProductsRequest,
 ) (*v1.ListProductsResponse, error) {
-	return server.HandleRequest[*v1.ListProductsResponse](s.srvStub, ctx, "ListProducts", req)
+	return fakegrpc.HandleRequest[*v1.ListProductsResponse](s.srvStub, ctx, "ListProducts", req)
 }
 
 func (s *WarehouseServer) SetListProductsResponse(
@@ -73,7 +73,7 @@ func (s *fakeWarehouseServerImpl) ShipProduct(
 	ctx context.Context,
 	req *v1.ShipProductRequest,
 ) (*v1.ShipProductResponse, error) {
-	return server.HandleRequest[*v1.ShipProductResponse](s.srvStub, ctx, "ShipProduct", req)
+	return fakegrpc.HandleRequest[*v1.ShipProductResponse](s.srvStub, ctx, "ShipProduct", req)
 }
 
 func (s *WarehouseServer) SetShipProductResponse(
