@@ -1,6 +1,6 @@
 // Copyright © 2023 Yoshiki Shibata. All rights reserved.
 
-package server
+package grpc
 
 // This file contains formats to generate a fake server.
 const fakeServerTemplate = `// This code is auto-generated. DO NOT EDIT.

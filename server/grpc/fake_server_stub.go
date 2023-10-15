@@ -1,6 +1,6 @@
 // Copyright © Yoshiki Shibata, Inc. All rights reserved.
 
-package server
+package grpc
 
 import (
 	"context"
