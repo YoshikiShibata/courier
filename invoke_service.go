@@ -27,10 +27,10 @@ type Config struct {
 	GRPCPort          int
 	Envs              []string
 	Verbose           bool
+	CoverageDir       string
 }
 
 func InvokeService(config *Config) (func() error, error) {
-
 	ctx, cancel := context.WithCancel(context.Background())
 
 	if err := os.Chdir(config.MakeDir); err != nil {
@@ -58,6 +58,7 @@ func InvokeService(config *Config) (func() error, error) {
 	// InvokeService
 	cmd = exec.CommandContext(ctx, config.ServiceBinaryPath)
 	cmd.Env = append(cmd.Env, config.Envs...)
+	cmd.Env = append(cmd.Env, "GOCOVERDIR="+config.CoverageDir)
 
 	if config.Verbose {
 		cmd.Stdout = os.Stdout
@@ -99,6 +100,10 @@ func InvokeService(config *Config) (func() error, error) {
 		err := <-exitedErr
 
 		cancel()
+
+		if err == nil {
+			showHowToSeeCoverage(config)
+		}
 		return err
 	}, nil
 }
@@ -145,4 +150,12 @@ func asyncWaitForServiceReady(config *Config) (ready chan struct{}) {
 
 func terminateService(cmd *exec.Cmd) {
 	cmd.Process.Signal(syscall.SIGTERM)
+}
+
+func showHowToSeeCoverage(config *Config) {
+	log.Printf("To see coverage, run the follwoing command")
+	log.Printf("  $ (cd %s; go tool covdata percent -i=%s)", config.MakeDir, config.CoverageDir)
+	log.Printf("Or to see which lines have been executed, run the following command")
+	log.Printf("  $ (cd %s; go tool covdata textfmt -i=%s -o profile.txt; go tool cover -html=profile.txt)",
+		config.MakeDir, config.CoverageDir)
 }

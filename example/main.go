@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -23,6 +24,7 @@ type Env struct {
 }
 
 func main() {
+	fmt.Printf("GOCOVERDIR: %s\n", os.Getenv("GOCOVERDIR"))
 	var env Env
 	if err := envconfig.Process("", &env); err != nil {
 		log.Fatalf("envconfig.Process failed: %v", err)
@@ -66,6 +68,6 @@ func main() {
 	signal.Notify(quitC, syscall.SIGINT, syscall.SIGTERM)
 	<-quitC
 
-	log.Printf("Stop Server")
 	grpcServer.Stop()
+	log.Printf("Service gracefully shut down")
 }

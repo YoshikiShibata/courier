@@ -13,4 +13,6 @@ genfakes:
 	gofmt -w fakeservers/warehouse_v1/server.go
 
 build:
-	go build -o bin/shop_server
+	rm -fr coverage
+	mkdir coverage
+	go build -cover -o bin/shop_server -coverpkg=github.com/YoshikiShibata/courier/example,github.com/YoshikiShibata/courier/example/internal/... .
