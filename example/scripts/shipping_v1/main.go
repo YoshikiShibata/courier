@@ -1,3 +1,5 @@
+// Copyright © 2023 Yoshiki Shibata. All rights reserved.
+
 package main
 
 import (

@@ -1,3 +1,5 @@
+// Copyright © 2023 Yoshiki Shibata. All rights reserved.
+
 package server
 
 import (
@@ -5,7 +7,9 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/YoshikiShibata/courier/example/api/shipping_v1"
 	"github.com/YoshikiShibata/courier/example/api/shop_v1"
+	"github.com/YoshikiShibata/courier/example/api/warehouse_v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -14,11 +18,13 @@ import (
 
 type GRPCServer struct {
 	server *grpc.Server
-	port   uint
+	port   int
 }
 
 func NewGRPCServer(
-	port uint,
+	port int,
+	shippingClient shipping_v1.ShippingClient,
+	warehouseClient warehouse_v1.WarehouseClient,
 	grpcOpts ...grpc.ServerOption,
 ) (
 	*GRPCServer,
@@ -26,10 +32,10 @@ func NewGRPCServer(
 ) {
 	gsrv := grpc.NewServer(grpcOpts...)
 	hsrv := health.NewServer()
-	hsrv.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	hsrv.SetServingStatus("Shop", healthpb.HealthCheckResponse_SERVING)
 	healthpb.RegisterHealthServer(gsrv, hsrv)
 
-	srv, err := newShopServer()
+	srv, err := newShopServer(shippingClient, warehouseClient)
 	if err != nil {
 		return nil, err
 	}
@@ -58,11 +64,19 @@ var _ shop_v1.ShopServer = (*shopServer)(nil)
 
 type shopServer struct {
 	shop_v1.UnimplementedShopServer
-	// TODO: add env
+
+	shippingClient  shipping_v1.ShippingClient
+	warehouseClient warehouse_v1.WarehouseClient
 }
 
-func newShopServer() (srv *shopServer, err error) {
-	srv = &shopServer{}
+func newShopServer(
+	shippingClient shipping_v1.ShippingClient,
+	warehouseClient warehouse_v1.WarehouseClient,
+) (srv *shopServer, err error) {
+	srv = &shopServer{
+		shippingClient:  shippingClient,
+		warehouseClient: warehouseClient,
+	}
 
 	return srv, nil
 }
