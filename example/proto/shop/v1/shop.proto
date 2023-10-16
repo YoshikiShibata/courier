@@ -4,34 +4,66 @@ package yoshikishibata.courier.example.api.shop.v1;
 
 option go_package = "/shop_v1";
 
+/**
+ * Shopサービスは、サンプルサービスとしての簡易的な機能を定義しています。
+ *
+ * [共通] すべてのエンドポイントに対して共通の振る舞いです。
+ * - サンプルサービスとしては、認証機能は定義していませんので、
+ *   Unauthenticatedエラーは返されません。
+ * -
+ * すべてのエンドポイントで、DeadlineExceededおよびCanceledのエラーが返されます。
+ * - Internalエラーは、サービス側の問題を示しており、明記されていません。
+ */
 service Shop {
-  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse){}
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {}
   rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
-  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse){}
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {}
   rpc GetOrderStatus(GetOrderStatusRequest) returns (GetOrderStatusResponse) {}
 }
 
+message Product {
+  // 商品ID
+  string id = 1;
+  // 商品名
+  string name = 2;
+  // 価格（円）
+  uint32 price = 3;
+  // 在庫数
+  uint32 quantity_available = 4;
+}
+
+/**
+ * ListProductsは、在庫がある商品一覧を返します。
+ * - num_of_productsは、一覧として返す最大個数を指定します。
+ * -
+ * page_tokenには、空文字列もしくはレスポンスで返されるnext_page_tokenを設定します。
+ *   - 空文字列の場合は、商品一覧の最初から返されます。
+ * - 商品一覧は、nameのアルファベット順に昇順に返されます。
+ *
+ * [エラー]
+ * - InvalidArgument:
+ *   - num_of_productsが0
+ *   - page_tokenが不正な値
+ */
 message ListProductsRequest {
+  uint32 num_of_products = 1;
+  string page_token = 2;
 }
 
 message ListProductsResponse {
+  repeated Product products = 1;
+  // 商品がさらに存在しない場合、空文字列が返されます。
+  string next_page_token = 2;
 }
 
-message GetProductRequest {
-}
+message GetProductRequest {}
 
-message GetProductResponse {
-}
+message GetProductResponse {}
 
-message CreateOrderRequest {
-}
+message CreateOrderRequest {}
 
+message CreateOrderResponse {}
 
-message CreateOrderResponse {
-}
+message GetOrderStatusRequest {}
 
-message GetOrderStatusRequest {
-}
-
-message GetOrderStatusResponse {
-}
+message GetOrderStatusResponse {}
