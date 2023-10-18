@@ -11,6 +11,7 @@ require (
 require (
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/travisjeffery/go-dynaport v1.0.0 // indirect

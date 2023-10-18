@@ -9,12 +9,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/YoshikiShibata/courier/example/api/shipping_v1"
-	"github.com/YoshikiShibata/courier/example/api/warehouse_v1"
-	"github.com/YoshikiShibata/courier/example/internal/server"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/YoshikiShibata/courier/example/api/shipping_v1"
+	"github.com/YoshikiShibata/courier/example/api/warehouse_v1"
+	"github.com/YoshikiShibata/courier/example/internal/server"
+	"github.com/YoshikiShibata/courier/tid"
 )
 
 type Env struct {
@@ -48,10 +51,15 @@ func main() {
 	defer func() { _ = warehouseCC.Close() }()
 	warehouseClient := warehouse_v1.NewWarehouseClient(warehouseCC)
 
+	grpcOpts := []grpc.ServerOption{
+		grpc_middleware.WithUnaryServerChain(tid.NewGRPCHeaderPropagator()),
+	}
+
 	grpcServer, err := server.NewGRPCServer(
 		env.GRPCServerPort,
 		shippingClient,
 		warehouseClient,
+		grpcOpts...,
 	)
 	if err != nil {
 		log.Fatalf("server.NewGRPCServer failed: %v", err)

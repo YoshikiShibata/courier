@@ -9,10 +9,40 @@ service Warehouse {
   rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse){}
 }
 
+message Product {
+  // 商品ID
+  string id = 1;
+  // 商品名
+  string name = 2;
+  // 価格（円）
+  uint32 price = 3;
+  // 在庫数
+  uint32 quantity_available = 4;
+}
+
+/**
+ * ListProductsは、扱っている商品一覧を返します。
+ * - 扱っている商品であれば、在庫がなくても返されます。
+ * - num_of_productsは、一覧として返す最大個数を指定します。
+ * -
+ * page_tokenには、空文字列もしくはレスポンスで返されるnext_page_tokenを設定します。
+ *   - 空文字列の場合は、商品一覧の最初から返されます。
+ * - 商品一覧は、nameのアルファベット順に昇順に返されます。
+ *
+ * [エラー]
+ * - InvalidArgument:
+ *   - num_of_productsが0
+ *   - page_tokenが不正な値
+ */
 message ListProductsRequest {
+  uint32 num_of_products = 1;
+  string page_token = 2;
 }
 
 message ListProductsResponse {
+  repeated Product products = 1;
+  // 商品がさらに存在しない場合、空文字列が返されます。
+  string next_page_token = 2;
 }
 
 message ShipProductRequest {

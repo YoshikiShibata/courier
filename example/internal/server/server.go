@@ -87,7 +87,33 @@ func (s *shopServer) ListProducts(
 	ctx context.Context,
 	req *shop_v1.ListProductsRequest,
 ) (*shop_v1.ListProductsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
+	res, err := s.warehouseClient.ListProducts(ctx, &warehouse_v1.ListProductsRequest{
+		NumOfProducts: req.GetNumOfProducts(),
+		PageToken:     req.GetPageToken(),
+	})
+	if status.Code(err) != codes.OK {
+		if status.Code(err) == codes.InvalidArgument {
+			return nil, status.Error(codes.InvalidArgument, "")
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	products := make([]*shop_v1.Product, 0, len(res.Products))
+	for _, p := range res.Products {
+		if p.QuantityAvailable == 0 {
+			continue
+		}
+		products = append(products, &shop_v1.Product{
+			Id:                p.Id,
+			Name:              p.Name,
+			Price:             p.Price,
+			QuantityAvailable: p.QuantityAvailable,
+		})
+	}
+	return &shop_v1.ListProductsResponse{
+		Products:      products,
+		NextPageToken: res.NextPageToken,
+	}, nil
 }
 
 func (s *shopServer) GetProduct(
