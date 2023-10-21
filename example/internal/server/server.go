@@ -83,19 +83,20 @@ func newShopServer(
 	return srv, nil
 }
 
-func (s *shopServer) ListProducts(
+func (s *shopServer) ListProductInventories(
 	ctx context.Context,
-	req *shop_v1.ListProductsRequest,
-) (*shop_v1.ListProductsResponse, error) {
+	req *shop_v1.ListProductInventoriesRequest,
+) (*shop_v1.ListProductInventoriesResponse, error) {
 	numOfProducts := req.GetNumOfProducts()
 	if numOfProducts == 0 {
 		return nil, status.Error(codes.InvalidArgument, "num_of_products")
 	}
 
-	res, err := s.warehouseClient.ListProducts(ctx, &warehouse_v1.ListProductsRequest{
-		NumOfProducts: numOfProducts,
-		PageToken:     req.GetPageToken(),
-	})
+	res, err := s.warehouseClient.ListProductInventories(ctx,
+		&warehouse_v1.ListProductInventoriesRequest{
+			NumOfProducts: numOfProducts,
+			PageToken:     req.GetPageToken(),
+		})
 
 	switch status.Code(err) {
 	case codes.OK:
@@ -109,21 +110,22 @@ func (s *shopServer) ListProducts(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	products := make([]*shop_v1.Product, 0, len(res.Products))
-	for _, p := range res.Products {
+	productInventories := make([]*shop_v1.ProductInventory, 0, len(res.ProductInventories))
+	for _, p := range res.ProductInventories {
 		if p.QuantityAvailable == 0 {
 			continue
 		}
-		products = append(products, &shop_v1.Product{
-			Number:            p.Number,
-			Name:              p.Name,
-			Price:             p.Price,
-			QuantityAvailable: p.QuantityAvailable,
-		})
+		productInventories = append(productInventories,
+			&shop_v1.ProductInventory{
+				Number:            p.Number,
+				Name:              p.Name,
+				Price:             p.Price,
+				QuantityAvailable: p.QuantityAvailable,
+			})
 	}
-	return &shop_v1.ListProductsResponse{
-		Products:      products,
-		NextPageToken: res.NextPageToken,
+	return &shop_v1.ListProductInventoriesResponse{
+		ProductInventories: productInventories,
+		NextPageToken:      res.NextPageToken,
 	}, nil
 }
 

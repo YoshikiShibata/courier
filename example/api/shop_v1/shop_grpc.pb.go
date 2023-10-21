@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShopClient interface {
-	ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error)
+	ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error)
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
 	GetOrderStatus(ctx context.Context, in *GetOrderStatusRequest, opts ...grpc.CallOption) (*GetOrderStatusResponse, error)
@@ -36,9 +36,9 @@ func NewShopClient(cc grpc.ClientConnInterface) ShopClient {
 	return &shopClient{cc}
 }
 
-func (c *shopClient) ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error) {
-	out := new(ListProductsResponse)
-	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.shop.v1.Shop/ListProducts", in, out, opts...)
+func (c *shopClient) ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error) {
+	out := new(ListProductInventoriesResponse)
+	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.shop.v1.Shop/ListProductInventories", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *shopClient) GetOrderStatus(ctx context.Context, in *GetOrderStatusReque
 // All implementations must embed UnimplementedShopServer
 // for forward compatibility
 type ShopServer interface {
-	ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error)
+	ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error)
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
 	GetOrderStatus(context.Context, *GetOrderStatusRequest) (*GetOrderStatusResponse, error)
@@ -87,8 +87,8 @@ type ShopServer interface {
 type UnimplementedShopServer struct {
 }
 
-func (UnimplementedShopServer) ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListProducts not implemented")
+func (UnimplementedShopServer) ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProductInventories not implemented")
 }
 func (UnimplementedShopServer) GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
@@ -112,20 +112,20 @@ func RegisterShopServer(s grpc.ServiceRegistrar, srv ShopServer) {
 	s.RegisterService(&Shop_ServiceDesc, srv)
 }
 
-func _Shop_ListProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListProductsRequest)
+func _Shop_ListProductInventories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProductInventoriesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShopServer).ListProducts(ctx, in)
+		return srv.(ShopServer).ListProductInventories(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/yoshikishibata.courier.example.api.shop.v1.Shop/ListProducts",
+		FullMethod: "/yoshikishibata.courier.example.api.shop.v1.Shop/ListProductInventories",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShopServer).ListProducts(ctx, req.(*ListProductsRequest))
+		return srv.(ShopServer).ListProductInventories(ctx, req.(*ListProductInventoriesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,8 +192,8 @@ var Shop_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ShopServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListProducts",
-			Handler:    _Shop_ListProducts_Handler,
+			MethodName: "ListProductInventories",
+			Handler:    _Shop_ListProductInventories_Handler,
 		},
 		{
 			MethodName: "GetProduct",

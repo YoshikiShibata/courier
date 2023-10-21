@@ -5,11 +5,11 @@ package yoshikishibata.courier.example.api.warehouse.v1;
 option go_package = "/warehouse_v1" ;
 
 service Warehouse {
-  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse){}
+  rpc ListProductInventories(ListProductInventoriesRequest) returns (ListProductInventoriesResponse){}
   rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse){}
 }
 
-message Product {
+message ProductInventory {
   // 商品番号
   string number = 1;
   // 商品名
@@ -21,8 +21,7 @@ message Product {
 }
 
 /**
- * ListProductsは、扱っている商品一覧を返します。
- * - 扱っている商品であれば、在庫がなくても返されます。
+ * ListProductInventoriesは、扱っている商品一覧を返します。
  * - num_of_productsは、一覧として返す最大個数を指定します。
  * -
  * page_tokenには、空文字列もしくはレスポンスで返されるnext_page_tokenを設定します。
@@ -34,13 +33,14 @@ message Product {
  *   - num_of_productsが0
  *   - page_tokenが不正な値
  */
-message ListProductsRequest {
+message ListProductInventoriesRequest {
   uint32 num_of_products = 1;
   string page_token = 2;
 }
 
-message ListProductsResponse {
-  repeated Product products = 1;
+message ListProductInventoriesResponse {
+  repeated ProductInventory product_inventories = 1;
+
   // 商品がさらに存在しない場合、空文字列が返されます。
   string next_page_token = 2;
 }

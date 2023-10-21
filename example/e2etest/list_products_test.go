@@ -18,49 +18,49 @@ import (
 	"github.com/YoshikiShibata/courier/tid"
 )
 
-func TestListProducts_InvalidArgumentNumOfProducts(t *testing.T) {
+func TestListProductInventories_InvalidArgumentNumOfProducts(t *testing.T) {
 	t.Parallel()
 
 	client := newShopClient(t)
 	ctx := context.Background()
 
-	// Calling and executing ListProducts.
-	_, err := client.ListProducts(ctx,
-		&shop_v1.ListProductsRequest{
+	// Calling and executing ListProductInventories.
+	_, err := client.ListProductInventories(ctx,
+		&shop_v1.ListProductInventoriesRequest{
 			NumOfProducts: 0, // invalid
 			PageToken:     "",
 		})
 
 	// Inspecting the result
 	if status.Code(err) != codes.InvalidArgument {
-		t.Errorf("ListProducts returned %v, want InvalidArgument", err)
+		t.Errorf("ListProductInventories returned %v, want InvalidArgument", err)
 	}
 }
 
-func TestListProducts_InvalidPageToken(t *testing.T) {
+func TestListProductInventories_InvalidPageToken(t *testing.T) {
 	t.Parallel()
 
 	client := newShopClient(t)
 	tid, ctx := tid.New(context.Background())
 
 	// Configuring responses from the fake Warehouse service.
-	fakeWarehouseServer.SetListProductsResponse(tid,
+	fakeWarehouseServer.SetListProductInventoriesResponse(tid,
 		nil, status.Error(codes.InvalidArgument, "page_token"))
 
-	// Calling and executing ListProducts.
-	_, err := client.ListProducts(ctx,
-		&shop_v1.ListProductsRequest{
+	// Calling and executing ListProductInventories.
+	_, err := client.ListProductInventories(ctx,
+		&shop_v1.ListProductInventoriesRequest{
 			NumOfProducts: 100,
 			PageToken:     uuid.NewString(), // invalid
 		})
 
 	// Inspecting the result
 	if status.Code(err) != codes.InvalidArgument {
-		t.Errorf("ListProducts returned %v, want InvalidArgument", err)
+		t.Errorf("ListProductInventories returned %v, want InvalidArgument", err)
 	}
 }
 
-func TestListProducts_CanceledAndDeadlineExceeded(t *testing.T) {
+func TestListProductInventories_CanceledAndDeadlineExceeded(t *testing.T) {
 	t.Parallel()
 
 	client := newShopClient(t)
@@ -80,24 +80,24 @@ func TestListProducts_CanceledAndDeadlineExceeded(t *testing.T) {
 		},
 	} {
 		// Configuring responses from the fake Warehouse service.
-		fakeWarehouseServer.SetListProductsResponse(tid,
+		fakeWarehouseServer.SetListProductInventoriesResponse(tid,
 			nil, status.Error(tc.code, tc.msg))
 
-		// Calling and executing ListProducts.
-		_, err := client.ListProducts(ctx,
-			&shop_v1.ListProductsRequest{
+		// Calling and executing ListProductInventories.
+		_, err := client.ListProductInventories(ctx,
+			&shop_v1.ListProductInventoriesRequest{
 				NumOfProducts: 100,
 				PageToken:     uuid.NewString(), // invalid
 			})
 
 		// Inspecting the result
 		if status.Code(err) != tc.code {
-			t.Errorf("ListProducts returned %v, want %v", err, tc.code)
+			t.Errorf("ListProductInventories returned %v, want %v", err, tc.code)
 		}
 	}
 }
 
-func TestListProducts_XXX(t *testing.T) {
+func TestListProductInventories_XXX(t *testing.T) {
 	t.Parallel()
 
 	client := newShopClient(t)
@@ -105,9 +105,9 @@ func TestListProducts_XXX(t *testing.T) {
 
 	// Preparing inventory at the Warehouse.
 	const numOfProducts = 100
-	warehouseProducts := make([]*warehouse_v1.Product, numOfProducts)
+	warehouseProducts := make([]*warehouse_v1.ProductInventory, numOfProducts)
 	for i := 0; i < numOfProducts; i++ {
-		warehouseProducts[i] = &warehouse_v1.Product{
+		warehouseProducts[i] = &warehouse_v1.ProductInventory{
 			Number:            uuid.NewString(),
 			Name:              fmt.Sprintf("商品-%03d", i),
 			Price:             uint32(i*10 + 100),
@@ -116,26 +116,26 @@ func TestListProducts_XXX(t *testing.T) {
 	}
 
 	// Configuring responses from the fake Warehouse service.
-	fakeWarehouseServer.SetListProductsResponse(tid,
-		&warehouse_v1.ListProductsResponse{
-			Products:      warehouseProducts,
-			NextPageToken: "",
+	fakeWarehouseServer.SetListProductInventoriesResponse(tid,
+		&warehouse_v1.ListProductInventoriesResponse{
+			ProductInventories: warehouseProducts,
+			NextPageToken:      "",
 		}, nil)
 
-	// Calling and executing ListProducts.
-	res, err := client.ListProducts(ctx, &shop_v1.ListProductsRequest{
+	// Calling and executing ListProductInventories.
+	res, err := client.ListProductInventories(ctx, &shop_v1.ListProductInventoriesRequest{
 		NumOfProducts: numOfProducts,
 		PageToken:     "",
 	})
 
 	// Inspecting the results
 	if status.Code(err) != codes.OK {
-		t.Fatalf("ListProducts failed: %v", err)
+		t.Fatalf("ListProductInventories failed: %v", err)
 	}
 
 	const wantNumOfProducts = (numOfProducts * 4) / 5
-	if len(res.Products) != wantNumOfProducts {
-		t.Fatalf("len(res.Products) is %d, want %d", len(res.Products), wantNumOfProducts)
+	if len(res.ProductInventories) != wantNumOfProducts {
+		t.Fatalf("len(res.Products) is %d, want %d", len(res.ProductInventories), wantNumOfProducts)
 	}
 
 	// Inspecting each returned Product individually.

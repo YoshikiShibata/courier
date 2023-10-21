@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WarehouseClient interface {
-	ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error)
+	ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error)
 	ShipProduct(ctx context.Context, in *ShipProductRequest, opts ...grpc.CallOption) (*ShipProductResponse, error)
 }
 
@@ -34,9 +34,9 @@ func NewWarehouseClient(cc grpc.ClientConnInterface) WarehouseClient {
 	return &warehouseClient{cc}
 }
 
-func (c *warehouseClient) ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error) {
-	out := new(ListProductsResponse)
-	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.warehouse.v1.Warehouse/ListProducts", in, out, opts...)
+func (c *warehouseClient) ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error) {
+	out := new(ListProductInventoriesResponse)
+	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.warehouse.v1.Warehouse/ListProductInventories", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (c *warehouseClient) ShipProduct(ctx context.Context, in *ShipProductReques
 // All implementations must embed UnimplementedWarehouseServer
 // for forward compatibility
 type WarehouseServer interface {
-	ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error)
+	ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error)
 	ShipProduct(context.Context, *ShipProductRequest) (*ShipProductResponse, error)
 	mustEmbedUnimplementedWarehouseServer()
 }
@@ -65,8 +65,8 @@ type WarehouseServer interface {
 type UnimplementedWarehouseServer struct {
 }
 
-func (UnimplementedWarehouseServer) ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListProducts not implemented")
+func (UnimplementedWarehouseServer) ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProductInventories not implemented")
 }
 func (UnimplementedWarehouseServer) ShipProduct(context.Context, *ShipProductRequest) (*ShipProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShipProduct not implemented")
@@ -84,20 +84,20 @@ func RegisterWarehouseServer(s grpc.ServiceRegistrar, srv WarehouseServer) {
 	s.RegisterService(&Warehouse_ServiceDesc, srv)
 }
 
-func _Warehouse_ListProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListProductsRequest)
+func _Warehouse_ListProductInventories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProductInventoriesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WarehouseServer).ListProducts(ctx, in)
+		return srv.(WarehouseServer).ListProductInventories(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/yoshikishibata.courier.example.api.warehouse.v1.Warehouse/ListProducts",
+		FullMethod: "/yoshikishibata.courier.example.api.warehouse.v1.Warehouse/ListProductInventories",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WarehouseServer).ListProducts(ctx, req.(*ListProductsRequest))
+		return srv.(WarehouseServer).ListProductInventories(ctx, req.(*ListProductInventoriesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,8 +128,8 @@ var Warehouse_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*WarehouseServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListProducts",
-			Handler:    _Warehouse_ListProducts_Handler,
+			MethodName: "ListProductInventories",
+			Handler:    _Warehouse_ListProductInventories_Handler,
 		},
 		{
 			MethodName: "ShipProduct",
