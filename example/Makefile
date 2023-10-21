@@ -1,3 +1,5 @@
+all: compile genfakes
+
 compile:
 	protoc proto/*/v1//*.proto \
 		--go_out=./api \

@@ -5,18 +5,14 @@ package yoshikishibata.courier.example.api.shipping.v1;
 option go_package = "/shipping_v1";
 
 service Shipping {
-  rpc Create(CreateShippingRequest) returns (CreateShippingResponse){}
-  rpc Status(ShippingStatusRequest) returns (ShippingStatusResponse){}
+  rpc Create(CreateShippingRequest) returns (CreateShippingResponse) {}
+  rpc Status(ShippingStatusRequest) returns (ShippingStatusResponse) {}
 }
 
-message CreateShippingRequest {
-}
+message CreateShippingRequest {}
 
-message CreateShippingResponse {
-}
+message CreateShippingResponse {}
 
-message ShippingStatusRequest {
-}
+message ShippingStatusRequest {}
 
-message ShippingStatusResponse {
-}
+message ShippingStatusResponse {}

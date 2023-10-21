@@ -2,11 +2,12 @@ syntax = "proto3";
 
 package yoshikishibata.courier.example.api.warehouse.v1;
 
-option go_package = "/warehouse_v1" ;
+option go_package = "/warehouse_v1";
 
 service Warehouse {
-  rpc ListProductInventories(ListProductInventoriesRequest) returns (ListProductInventoriesResponse){}
-  rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse){}
+  rpc ListProductInventories(ListProductInventoriesRequest)
+      returns (ListProductInventoriesResponse) {}
+  rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse) {}
 }
 
 message ProductInventory {
@@ -45,8 +46,6 @@ message ListProductInventoriesResponse {
   string next_page_token = 2;
 }
 
-message ShipProductRequest {
-}
+message ShipProductRequest {}
 
-message ShipProductResponse {
-}
+message ShipProductResponse {}
