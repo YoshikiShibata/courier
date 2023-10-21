@@ -18,49 +18,126 @@ import (
 	"github.com/YoshikiShibata/courier/tid"
 )
 
-func TestListProducts_XXX(t *testing.T) {
+func TestListProducts_InvalidArgumentNumOfProducts(t *testing.T) {
 	t.Parallel()
 
 	client := newShopClient(t)
 	ctx := context.Background()
 
-	// Warehouseの在庫準備
+	// Calling and executing ListProducts.
+	_, err := client.ListProducts(ctx,
+		&shop_v1.ListProductsRequest{
+			NumOfProducts: 0, // invalid
+			PageToken:     "",
+		})
+
+	// Inspecting the result
+	if status.Code(err) != codes.InvalidArgument {
+		t.Errorf("ListProducts returned %v, want InvalidArgument", err)
+	}
+}
+
+func TestListProducts_InvalidPageToken(t *testing.T) {
+	t.Parallel()
+
+	client := newShopClient(t)
+	tid, ctx := tid.New(context.Background())
+
+	// Configuring responses from the fake Warehouse service.
+	fakeWarehouseServer.SetListProductsResponse(tid,
+		nil, status.Error(codes.InvalidArgument, "page_token"))
+
+	// Calling and executing ListProducts.
+	_, err := client.ListProducts(ctx,
+		&shop_v1.ListProductsRequest{
+			NumOfProducts: 100,
+			PageToken:     uuid.NewString(), // invalid
+		})
+
+	// Inspecting the result
+	if status.Code(err) != codes.InvalidArgument {
+		t.Errorf("ListProducts returned %v, want InvalidArgument", err)
+	}
+}
+
+func TestListProducts_CanceledAndDeadlineExceeded(t *testing.T) {
+	t.Parallel()
+
+	client := newShopClient(t)
+	tid, ctx := tid.New(context.Background())
+
+	for _, tc := range []struct {
+		code codes.Code
+		msg  string
+	}{
+		{
+			code: codes.Canceled,
+			msg:  "canceled",
+		},
+		{
+			code: codes.DeadlineExceeded,
+			msg:  "deadline exceeded",
+		},
+	} {
+		// Configuring responses from the fake Warehouse service.
+		fakeWarehouseServer.SetListProductsResponse(tid,
+			nil, status.Error(tc.code, tc.msg))
+
+		// Calling and executing ListProducts.
+		_, err := client.ListProducts(ctx,
+			&shop_v1.ListProductsRequest{
+				NumOfProducts: 100,
+				PageToken:     uuid.NewString(), // invalid
+			})
+
+		// Inspecting the result
+		if status.Code(err) != tc.code {
+			t.Errorf("ListProducts returned %v, want %v", err, tc.code)
+		}
+	}
+}
+
+func TestListProducts_XXX(t *testing.T) {
+	t.Parallel()
+
+	client := newShopClient(t)
+	tid, ctx := tid.New(context.Background())
+
+	// Preparing inventory at the Warehouse.
 	const numOfProducts = 100
 	warehouseProducts := make([]*warehouse_v1.Product, numOfProducts)
 	for i := 0; i < numOfProducts; i++ {
 		warehouseProducts[i] = &warehouse_v1.Product{
-			Id:                uuid.NewString(),
+			Number:            uuid.NewString(),
 			Name:              fmt.Sprintf("商品-%03d", i),
 			Price:             uint32(i*10 + 100),
-			QuantityAvailable: uint32(i % 5), // 5個おきに、在庫無し
+			QuantityAvailable: uint32(i % 5), // Out of stock every 5 products
 		}
 	}
 
-	// フェイクサービスの設定
-	tid, ctx := tid.New(ctx)
+	// Configuring responses from the fake Warehouse service.
 	fakeWarehouseServer.SetListProductsResponse(tid,
 		&warehouse_v1.ListProductsResponse{
 			Products:      warehouseProducts,
 			NextPageToken: "",
 		}, nil)
 
-	// 実行
+	// Calling and executing ListProducts.
 	res, err := client.ListProducts(ctx, &shop_v1.ListProductsRequest{
 		NumOfProducts: numOfProducts,
 		PageToken:     "",
 	})
 
-	// 検査
+	// Inspecting the results
 	if status.Code(err) != codes.OK {
 		t.Fatalf("ListProducts failed: %v", err)
 	}
 
 	const wantNumOfProducts = (numOfProducts * 4) / 5
-
 	if len(res.Products) != wantNumOfProducts {
 		t.Fatalf("len(res.Products) is %d, want %d", len(res.Products), wantNumOfProducts)
 	}
 
-	// 返されたProductsの確認
+	// Inspecting each returned Product individually.
 	// ...
 }

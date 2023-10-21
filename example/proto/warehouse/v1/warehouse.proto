@@ -10,8 +10,8 @@ service Warehouse {
 }
 
 message Product {
-  // 商品ID
-  string id = 1;
+  // 商品番号
+  string number = 1;
   // 商品名
   string name = 2;
   // 価格（円）

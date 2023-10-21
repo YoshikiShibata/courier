@@ -87,14 +87,25 @@ func (s *shopServer) ListProducts(
 	ctx context.Context,
 	req *shop_v1.ListProductsRequest,
 ) (*shop_v1.ListProductsResponse, error) {
+	numOfProducts := req.GetNumOfProducts()
+	if numOfProducts == 0 {
+		return nil, status.Error(codes.InvalidArgument, "num_of_products")
+	}
+
 	res, err := s.warehouseClient.ListProducts(ctx, &warehouse_v1.ListProductsRequest{
-		NumOfProducts: req.GetNumOfProducts(),
+		NumOfProducts: numOfProducts,
 		PageToken:     req.GetPageToken(),
 	})
-	if status.Code(err) != codes.OK {
-		if status.Code(err) == codes.InvalidArgument {
-			return nil, status.Error(codes.InvalidArgument, "")
-		}
+
+	switch status.Code(err) {
+	case codes.OK:
+		break
+	case codes.Canceled,
+		codes.DeadlineExceeded:
+		return nil, err
+	case codes.InvalidArgument:
+		return nil, status.Error(codes.InvalidArgument, "page_token")
+	default:
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -104,7 +115,7 @@ func (s *shopServer) ListProducts(
 			continue
 		}
 		products = append(products, &shop_v1.Product{
-			Id:                p.Id,
+			Number:            p.Number,
 			Name:              p.Name,
 			Price:             p.Price,
 			QuantityAvailable: p.QuantityAvailable,
