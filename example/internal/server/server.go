@@ -129,13 +129,6 @@ func (s *shopServer) ListProductInventories(
 	}, nil
 }
 
-func (s *shopServer) GetProduct(
-	ctx context.Context,
-	req *shop_v1.GetProductRequest,
-) (*shop_v1.GetProductResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
-}
-
 func (s *shopServer) CreateOrder(
 	ctx context.Context,
 	req *shop_v1.CreateOrderRequest,
@@ -143,9 +136,9 @@ func (s *shopServer) CreateOrder(
 	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }
 
-func (s *shopServer) GetOrderStatus(
+func (s *shopServer) GetShippingStatus(
 	ctx context.Context,
-	req *shop_v1.GetOrderStatusRequest,
-) (*shop_v1.GetOrderStatusResponse, error) {
+	req *shop_v1.GetShippingStatusRequest,
+) (*shop_v1.GetShippingStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }

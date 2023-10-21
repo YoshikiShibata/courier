@@ -46,6 +46,15 @@ message ListProductInventoriesResponse {
   string next_page_token = 2;
 }
 
-message ShipProductRequest {}
+message ShipProductRequest {
+  // 注文番号
+  string order_id = 1;
+  // 商品番号
+  string number = 2;
+  // 個数
+  uint32 num_of_items = 3;
+  // 送付先
+  string shipping_address = 4;
+}
 
 message ShipProductResponse {}

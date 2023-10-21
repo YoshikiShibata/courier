@@ -23,9 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShopClient interface {
 	ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error)
-	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
-	GetOrderStatus(ctx context.Context, in *GetOrderStatusRequest, opts ...grpc.CallOption) (*GetOrderStatusResponse, error)
+	GetShippingStatus(ctx context.Context, in *GetShippingStatusRequest, opts ...grpc.CallOption) (*GetShippingStatusResponse, error)
 }
 
 type shopClient struct {
@@ -45,15 +44,6 @@ func (c *shopClient) ListProductInventories(ctx context.Context, in *ListProduct
 	return out, nil
 }
 
-func (c *shopClient) GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error) {
-	out := new(GetProductResponse)
-	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.shop.v1.Shop/GetProduct", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *shopClient) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error) {
 	out := new(CreateOrderResponse)
 	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.shop.v1.Shop/CreateOrder", in, out, opts...)
@@ -63,9 +53,9 @@ func (c *shopClient) CreateOrder(ctx context.Context, in *CreateOrderRequest, op
 	return out, nil
 }
 
-func (c *shopClient) GetOrderStatus(ctx context.Context, in *GetOrderStatusRequest, opts ...grpc.CallOption) (*GetOrderStatusResponse, error) {
-	out := new(GetOrderStatusResponse)
-	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.shop.v1.Shop/GetOrderStatus", in, out, opts...)
+func (c *shopClient) GetShippingStatus(ctx context.Context, in *GetShippingStatusRequest, opts ...grpc.CallOption) (*GetShippingStatusResponse, error) {
+	out := new(GetShippingStatusResponse)
+	err := c.cc.Invoke(ctx, "/yoshikishibata.courier.example.api.shop.v1.Shop/GetShippingStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +67,8 @@ func (c *shopClient) GetOrderStatus(ctx context.Context, in *GetOrderStatusReque
 // for forward compatibility
 type ShopServer interface {
 	ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error)
-	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
-	GetOrderStatus(context.Context, *GetOrderStatusRequest) (*GetOrderStatusResponse, error)
+	GetShippingStatus(context.Context, *GetShippingStatusRequest) (*GetShippingStatusResponse, error)
 	mustEmbedUnimplementedShopServer()
 }
 
@@ -90,14 +79,11 @@ type UnimplementedShopServer struct {
 func (UnimplementedShopServer) ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProductInventories not implemented")
 }
-func (UnimplementedShopServer) GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
-}
 func (UnimplementedShopServer) CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateOrder not implemented")
 }
-func (UnimplementedShopServer) GetOrderStatus(context.Context, *GetOrderStatusRequest) (*GetOrderStatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatus not implemented")
+func (UnimplementedShopServer) GetShippingStatus(context.Context, *GetShippingStatusRequest) (*GetShippingStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetShippingStatus not implemented")
 }
 func (UnimplementedShopServer) mustEmbedUnimplementedShopServer() {}
 
@@ -130,24 +116,6 @@ func _Shop_ListProductInventories_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Shop_GetProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetProductRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ShopServer).GetProduct(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/yoshikishibata.courier.example.api.shop.v1.Shop/GetProduct",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShopServer).GetProduct(ctx, req.(*GetProductRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Shop_CreateOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateOrderRequest)
 	if err := dec(in); err != nil {
@@ -166,20 +134,20 @@ func _Shop_CreateOrder_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Shop_GetOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetOrderStatusRequest)
+func _Shop_GetShippingStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetShippingStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShopServer).GetOrderStatus(ctx, in)
+		return srv.(ShopServer).GetShippingStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/yoshikishibata.courier.example.api.shop.v1.Shop/GetOrderStatus",
+		FullMethod: "/yoshikishibata.courier.example.api.shop.v1.Shop/GetShippingStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShopServer).GetOrderStatus(ctx, req.(*GetOrderStatusRequest))
+		return srv.(ShopServer).GetShippingStatus(ctx, req.(*GetShippingStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -196,16 +164,12 @@ var Shop_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Shop_ListProductInventories_Handler,
 		},
 		{
-			MethodName: "GetProduct",
-			Handler:    _Shop_GetProduct_Handler,
-		},
-		{
 			MethodName: "CreateOrder",
 			Handler:    _Shop_CreateOrder_Handler,
 		},
 		{
-			MethodName: "GetOrderStatus",
-			Handler:    _Shop_GetOrderStatus_Handler,
+			MethodName: "GetShippingStatus",
+			Handler:    _Shop_GetShippingStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
