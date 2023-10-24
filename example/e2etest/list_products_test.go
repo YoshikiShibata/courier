@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -104,7 +106,7 @@ func TestListProductInventories_Normal(t *testing.T) {
 	tid, ctx := tid.New(context.Background())
 
 	// Preparing inventory at the Warehouse.
-	const numOfProducts = 100
+	const numOfProducts = 10
 	warehouseProducts := make([]*warehouse_v1.ProductInventory, numOfProducts)
 	for i := 0; i < numOfProducts; i++ {
 		warehouseProducts[i] = &warehouse_v1.ProductInventory{
@@ -133,11 +135,20 @@ func TestListProductInventories_Normal(t *testing.T) {
 		t.Fatalf("ListProductInventories failed: %v", err)
 	}
 
-	const wantNumOfProducts = (numOfProducts * 4) / 5
-	if len(res.ProductInventories) != wantNumOfProducts {
-		t.Fatalf("len(res.Products) is %d, want %d", len(res.ProductInventories), wantNumOfProducts)
+	// Inspecting each returned ProductInventory
+	wantProductInventories := make([]*shop_v1.ProductInventory, 0, len(warehouseProducts))
+	for _, p := range warehouseProducts {
+		wantProductInventories = append(wantProductInventories,
+			&shop_v1.ProductInventory{
+				Number:            p.Number,
+				Name:              p.Name,
+				Price:             p.Price,
+				QuantityAvailable: p.QuantityAvailable,
+			})
 	}
 
-	// Inspecting each returned Product individually.
-	// ...
+	opts := cmpopts.IgnoreUnexported(shop_v1.ProductInventory{})
+	if diff := cmp.Diff(res.ProductInventories, wantProductInventories, opts); diff != "" {
+		t.Errorf("(-want, +got)\n%s", diff)
+	}
 }

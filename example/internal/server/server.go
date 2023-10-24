@@ -112,9 +112,6 @@ func (s *shopServer) ListProductInventories(
 
 	productInventories := make([]*shop_v1.ProductInventory, 0, len(res.ProductInventories))
 	for _, p := range res.ProductInventories {
-		if p.QuantityAvailable == 0 {
-			continue
-		}
 		productInventories = append(productInventories,
 			&shop_v1.ProductInventory{
 				Number:            p.Number,
