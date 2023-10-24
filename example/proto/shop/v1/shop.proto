@@ -72,7 +72,7 @@ message ListProductInventoriesResponse {
  */
 message CreateOrderRequest {
   // 商品番号
-  string number = 1;
+  string product_number = 1;
   // 個数
   uint32 num_of_items = 2;
   // 送付先

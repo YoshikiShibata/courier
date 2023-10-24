@@ -97,7 +97,7 @@ func TestListProductInventories_CanceledAndDeadlineExceeded(t *testing.T) {
 	}
 }
 
-func TestListProductInventories_XXX(t *testing.T) {
+func TestListProductInventories_Normal(t *testing.T) {
 	t.Parallel()
 
 	client := newShopClient(t)
