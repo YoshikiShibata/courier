@@ -22,7 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShippingClient interface {
+	// 商品の発送処理を行います。
 	Create(ctx context.Context, in *CreateShippingRequest, opts ...grpc.CallOption) (*CreateShippingResponse, error)
+	// 商品の発送ステータスを返します。
 	Status(ctx context.Context, in *ShippingStatusRequest, opts ...grpc.CallOption) (*ShippingStatusResponse, error)
 }
 
@@ -56,7 +58,9 @@ func (c *shippingClient) Status(ctx context.Context, in *ShippingStatusRequest, 
 // All implementations must embed UnimplementedShippingServer
 // for forward compatibility
 type ShippingServer interface {
+	// 商品の発送処理を行います。
 	Create(context.Context, *CreateShippingRequest) (*CreateShippingResponse, error)
+	// 商品の発送ステータスを返します。
 	Status(context.Context, *ShippingStatusRequest) (*ShippingStatusResponse, error)
 	mustEmbedUnimplementedShippingServer()
 }

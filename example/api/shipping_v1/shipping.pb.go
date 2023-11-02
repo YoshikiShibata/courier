@@ -23,10 +23,13 @@ const (
 type ShippingStatusResponse_Status int32
 
 const (
-	ShippingStatusResponse_UNSPECIFIED       ShippingStatusResponse_Status = 0
+	ShippingStatusResponse_UNSPECIFIED ShippingStatusResponse_Status = 0
+	// 発送待ち
 	ShippingStatusResponse_AWAITING_SHIPMENT ShippingStatusResponse_Status = 1
-	ShippingStatusResponse_OUT_FOR_DELIVERY  ShippingStatusResponse_Status = 2
-	ShippingStatusResponse_DELIVERED         ShippingStatusResponse_Status = 3
+	// 発送済み（配送中）
+	ShippingStatusResponse_OUT_FOR_DELIVERY ShippingStatusResponse_Status = 2
+	// 配達済み
+	ShippingStatusResponse_DELIVERED ShippingStatusResponse_Status = 3
 )
 
 // Enum value maps for ShippingStatusResponse_Status.

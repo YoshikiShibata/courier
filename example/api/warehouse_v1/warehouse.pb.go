@@ -20,6 +20,8 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// *
+// ProductInventoryは、扱っている商品の情報を表します。
 type ProductInventory struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

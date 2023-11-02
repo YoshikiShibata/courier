@@ -22,7 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WarehouseClient interface {
+	// 扱っている商品一覧を返します。
 	ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error)
+	// 商品を出荷します。
 	ShipProduct(ctx context.Context, in *ShipProductRequest, opts ...grpc.CallOption) (*ShipProductResponse, error)
 }
 
@@ -56,7 +58,9 @@ func (c *warehouseClient) ShipProduct(ctx context.Context, in *ShipProductReques
 // All implementations must embed UnimplementedWarehouseServer
 // for forward compatibility
 type WarehouseServer interface {
+	// 扱っている商品一覧を返します。
 	ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error)
+	// 商品を出荷します。
 	ShipProduct(context.Context, *ShipProductRequest) (*ShipProductResponse, error)
 	mustEmbedUnimplementedWarehouseServer()
 }

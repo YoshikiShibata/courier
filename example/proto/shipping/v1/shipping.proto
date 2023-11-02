@@ -8,7 +8,9 @@ option go_package = "/shipping_v1";
  * Shippingサービスは、商品の発送とその追跡の管理を行います。
  */
 service Shipping {
+  // 商品の発送処理を行います。
   rpc Create(CreateShippingRequest) returns (CreateShippingResponse) {}
+  // 商品の発送ステータスを返します。
   rpc Status(ShippingStatusRequest) returns (ShippingStatusResponse) {}
 }
 
@@ -40,8 +42,11 @@ message ShippingStatusRequest {
 message ShippingStatusResponse {
   enum Status {
     UNSPECIFIED = 0;
+    // 発送待ち
     AWAITING_SHIPMENT = 1;
+    // 発送済み（配送中）
     OUT_FOR_DELIVERY = 2;
+    // 配達済み
     DELIVERED = 3;
   }
 

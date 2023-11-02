@@ -4,12 +4,21 @@ package yoshikishibata.courier.example.api.warehouse.v1;
 
 option go_package = "/warehouse_v1";
 
+/**
+ * Warehouseは商品在庫の管理と出荷処理を行います。
+ * - 出荷は、Shippingサービスへ依頼されます。
+ */
 service Warehouse {
+  // 扱っている商品一覧を返します。
   rpc ListProductInventories(ListProductInventoriesRequest)
       returns (ListProductInventoriesResponse) {}
+  // 商品を出荷します。
   rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse) {}
 }
 
+/**
+ * ProductInventoryは、扱っている商品の情報を表します。
+ */
 message ProductInventory {
   // 商品番号
   string number = 1;
