@@ -18,13 +18,9 @@ service Shipping {
  * CreateShippingは、発送する商品をまとめたパッケージを受け取り発送します。
  * - 発送のステータスを返すためのshipping_idを返します。
  */
-message CreateShippingRequest {
-  string order_id = 1;
-}
+message CreateShippingRequest { string order_id = 1; }
 
-message CreateShippingResponse {
-  string shipping_id = 1;
-}
+message CreateShippingResponse { string shipping_id = 1; }
 
 /**
  * ShippingStatusは、商品の発送のステータスを返します。
@@ -33,11 +29,9 @@ message CreateShippingResponse {
  * - InvalidArgument:
  *   - shipping_idが空文字列
  * - NotFound:
- *   - shipping_idで指定された発送がない  
+ *   - shipping_idで指定された発送がない
  */
-message ShippingStatusRequest {
-  string shipping_id = 1;
-}
+message ShippingStatusRequest { string shipping_id = 1; }
 
 message ShippingStatusResponse {
   enum Status {

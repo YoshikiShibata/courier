@@ -15,9 +15,12 @@ option go_package = "/shop_v1";
  * - Internalエラーは、サービス側の問題を示しており、明記されていません。
  */
 service Shop {
+  // 扱っている商品一覧を返します。
   rpc ListProductInventories(ListProductInventoriesRequest)
       returns (ListProductInventoriesResponse) {}
+  // 注文を作成して発送処理をします。
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {}
+  // 発送ステータスを返します。
   rpc GetShippingStatus(GetShippingStatusRequest)
       returns (GetShippingStatusResponse) {}
 }

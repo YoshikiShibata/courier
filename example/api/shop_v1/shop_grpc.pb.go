@@ -22,8 +22,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShopClient interface {
+	// 扱っている商品一覧を返します。
 	ListProductInventories(ctx context.Context, in *ListProductInventoriesRequest, opts ...grpc.CallOption) (*ListProductInventoriesResponse, error)
+	// 注文を作成して発送処理をします。
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
+	// 発送ステータスを返します。
 	GetShippingStatus(ctx context.Context, in *GetShippingStatusRequest, opts ...grpc.CallOption) (*GetShippingStatusResponse, error)
 }
 
@@ -66,8 +69,11 @@ func (c *shopClient) GetShippingStatus(ctx context.Context, in *GetShippingStatu
 // All implementations must embed UnimplementedShopServer
 // for forward compatibility
 type ShopServer interface {
+	// 扱っている商品一覧を返します。
 	ListProductInventories(context.Context, *ListProductInventoriesRequest) (*ListProductInventoriesResponse, error)
+	// 注文を作成して発送処理をします。
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
+	// 発送ステータスを返します。
 	GetShippingStatus(context.Context, *GetShippingStatusRequest) (*GetShippingStatusResponse, error)
 	mustEmbedUnimplementedShopServer()
 }
