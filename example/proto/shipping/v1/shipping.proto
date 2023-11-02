@@ -4,15 +4,47 @@ package yoshikishibata.courier.example.api.shipping.v1;
 
 option go_package = "/shipping_v1";
 
+/**
+ * Shippingサービスは、商品の発送とその追跡の管理を行います。
+ */
 service Shipping {
   rpc Create(CreateShippingRequest) returns (CreateShippingResponse) {}
   rpc Status(ShippingStatusRequest) returns (ShippingStatusResponse) {}
 }
 
-message CreateShippingRequest {}
+/**
+ * CreateShippingは、発送する商品をまとめたパッケージを受け取り発送します。
+ * - 発送のステータスを返すためのshipping_idを返します。
+ */
+message CreateShippingRequest {
+  string order_id = 1;
+}
 
-message CreateShippingResponse {}
+message CreateShippingResponse {
+  string shipping_id = 1;
+}
 
-message ShippingStatusRequest {}
+/**
+ * ShippingStatusは、商品の発送のステータスを返します。
+ *
+ * [エラー]
+ * - InvalidArgument:
+ *   - shipping_idが空文字列
+ * - NotFound:
+ *   - shipping_idで指定された発送がない  
+ */
+message ShippingStatusRequest {
+  string shipping_id = 1;
+}
 
-message ShippingStatusResponse {}
+message ShippingStatusResponse {
+  enum Status {
+    UNSPECIFIED = 0;
+    AWAITING_SHIPMENT = 1;
+    OUT_FOR_DELIVERY = 2;
+    DELIVERED = 3;
+  }
+
+  string shippid_id = 1;
+  Status status = 2;
+}
