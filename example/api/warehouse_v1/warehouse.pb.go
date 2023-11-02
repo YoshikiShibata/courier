@@ -219,6 +219,21 @@ func (x *ListProductInventoriesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// *
+// ShipProductは、指定された商品を出荷します。
+//
+// [エラー]
+// - InvalidArgument:
+//   - order_idが空文字列
+//   - numberが空文字列
+//   - num_of_itemsが0
+//   - shipping_addressが空文字列
+//
+// - NotFound:
+//   - numberで指定された商品は扱っていない
+//
+// - FailedPrecondition:
+//   - num_of_itemsで指定された個数の在庫がないため出荷できない。
 type ShipProductRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

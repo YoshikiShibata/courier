@@ -46,6 +46,20 @@ message ListProductInventoriesResponse {
   string next_page_token = 2;
 }
 
+/**
+ * ShipProductは、指定された商品を出荷します。
+ *
+ * [エラー]
+ * - InvalidArgument:
+ *   - order_idが空文字列
+ *   - numberが空文字列
+ *   - num_of_itemsが0
+ *   - shipping_addressが空文字列
+ * - NotFound:
+ *   - numberで指定された商品は扱っていない
+ * - FailedPrecondition:
+ *   - num_of_itemsで指定された個数の在庫がないため出荷できない。
+ */
 message ShipProductRequest {
   // 注文番号
   string order_id = 1;
