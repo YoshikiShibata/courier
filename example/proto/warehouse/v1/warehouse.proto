@@ -48,6 +48,8 @@ message ListProductInventoriesResponse {
 
 /**
  * ShipProductは、指定された商品を出荷します。
+ * - Shippingサービスでステータスを問い合わせるための
+ *   shipping_idを返します。
  *
  * [エラー]
  * - InvalidArgument:
@@ -71,4 +73,7 @@ message ShipProductRequest {
   string shipping_address = 4;
 }
 
-message ShipProductResponse {}
+message ShipProductResponse {
+  // 出荷番号
+  string shipping_id = 1;
+}
