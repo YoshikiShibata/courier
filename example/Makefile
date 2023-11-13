@@ -22,3 +22,7 @@ build:
 	rm -fr coverage
 	mkdir coverage
 	go build -race -cover -o bin/shop_server -coverpkg=$(COVER_PKGS) .
+
+clean:
+	rm -fr coverage
+	rm -fr bin/shop_server profile.txt
