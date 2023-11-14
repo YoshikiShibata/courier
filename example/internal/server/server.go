@@ -83,18 +83,47 @@ func newShopServer(
 	return srv, nil
 }
 
-func (s *shopServer) ListProducts(
+func (s *shopServer) ListProductInventories(
 	ctx context.Context,
-	req *shop_v1.ListProductsRequest,
-) (*shop_v1.ListProductsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
-}
+	req *shop_v1.ListProductInventoriesRequest,
+) (*shop_v1.ListProductInventoriesResponse, error) {
+	numOfProducts := req.GetNumOfProducts()
+	if numOfProducts == 0 {
+		return nil, status.Error(codes.InvalidArgument, "num_of_products")
+	}
 
-func (s *shopServer) GetProduct(
-	ctx context.Context,
-	req *shop_v1.GetProductRequest,
-) (*shop_v1.GetProductResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
+	res, err := s.warehouseClient.ListProductInventories(ctx,
+		&warehouse_v1.ListProductInventoriesRequest{
+			NumOfProducts: numOfProducts,
+			PageToken:     req.GetPageToken(),
+		})
+
+	switch status.Code(err) {
+	case codes.OK:
+		break
+	case codes.Canceled,
+		codes.DeadlineExceeded:
+		return nil, err
+	case codes.InvalidArgument:
+		return nil, status.Error(codes.InvalidArgument, "page_token")
+	default:
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	productInventories := make([]*shop_v1.ProductInventory, 0, len(res.ProductInventories))
+	for _, p := range res.ProductInventories {
+		productInventories = append(productInventories,
+			&shop_v1.ProductInventory{
+				Number:            p.Number,
+				Name:              p.Name,
+				Price:             p.Price,
+				QuantityAvailable: p.QuantityAvailable,
+			})
+	}
+	return &shop_v1.ListProductInventoriesResponse{
+		ProductInventories: productInventories,
+		NextPageToken:      res.NextPageToken,
+	}, nil
 }
 
 func (s *shopServer) CreateOrder(
@@ -104,9 +133,9 @@ func (s *shopServer) CreateOrder(
 	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }
 
-func (s *shopServer) GetOrderStatus(
+func (s *shopServer) GetShippingStatus(
 	ctx context.Context,
-	req *shop_v1.GetOrderStatusRequest,
-) (*shop_v1.GetOrderStatusResponse, error) {
+	req *shop_v1.GetShippingStatusRequest,
+) (*shop_v1.GetShippingStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "Not Implemented Yet")
 }

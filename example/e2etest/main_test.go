@@ -15,6 +15,7 @@ import (
 	"github.com/travisjeffery/go-dynaport"
 
 	"github.com/YoshikiShibata/courier"
+	fakepublisher_v1 "github.com/YoshikiShibata/courier/example/fakeservers/publisher_v1"
 	fakeshipping_v1 "github.com/YoshikiShibata/courier/example/fakeservers/shipping_v1"
 	fakewarehouse_v1 "github.com/YoshikiShibata/courier/example/fakeservers/warehouse_v1"
 )
@@ -30,13 +31,40 @@ var (
 	fakeShippingServer  *fakeshipping_v1.ShippingServer
 	fakeWarehouseServer *fakewarehouse_v1.WarehouseServer
 	shopGRPCPort        int
+
+	fakePublisherServer *fakepublisher_v1.PublisherServer
 )
 
 func e2eCoverage(m *testing.M) (exitCode int) {
+	// フェイクサービス用のgRPCサーバ—
+	grpcServer := fakegrpc.NewGRPCServer()
+
+	// Shippingフェイクサービスの作成
+	fakeShippingServer = fakeshipping_v1.NewShippingServer(grpcServer.Server())
+	// Warehouseフェイクサービスの作成
+	fakeWarehouseServer = fakewarehouse_v1.NewWarehouseServer(grpcServer.Server())
+
+	// Publisherフェイクサービスの作成
+	fakePublisherServer = fakepublisher_v1.NewPublisherServer(grpcServer.Server())
+
+	// フェイクサービスの環境変数作成（と表示）
+	shippingSvcEnv := fmt.Sprintf("SHIPPING_SERVICE_ADDR=localhost:%s", grpcServer.Port())
+	warehouseSvcEnv := fmt.Sprintf("WAREHOUSE_SERVICE_ADDR=localhost:%s", grpcServer.Port())
+	log.Printf("%s", shippingSvcEnv)
+	log.Printf("%s", warehouseSvcEnv)
+
+	publisherSvcEnv := fmt.Sprintf("PUBSUB_EMULATOR_HOST=localhost:%s", grpcServer.Port())
+	log.Printf("%s", publisherSvcEnv)
+
+	// フェイクサービスのgRPCサーバーの起動
+	go func() { grpcServer.Serve() }()
+
+	// テスト対象サービスのgRPCサーバーのポート割り当て
 	ports := dynaport.Get(1)
 	shopGRPCPort = ports[0]
 	log.Printf("GRPC Port for Shop service is %d", shopGRPCPort)
 
+	// テスト対象サービスの起動用Config設定
 	config := &courier.Config{
 		MakeDir:           "..",
 		MakeBuildTarget:   "build",
@@ -46,33 +74,25 @@ func e2eCoverage(m *testing.M) (exitCode int) {
 		Verbose:           testing.Verbose(),
 		CoverageDir:       "coverage",
 	}
-
-	grpcServer := fakegrpc.NewGRPCServer()
-
-	fakeShippingServer = fakeshipping_v1.NewShippingServer(grpcServer.Server())
-	fakeWarehouseServer = fakewarehouse_v1.NewWarehouseServer(grpcServer.Server())
-
-	shippingSvcEnv := fmt.Sprintf("SHIPPING_SERVICE_ADDR=localhost:%s", grpcServer.Port())
-	log.Printf("%s", shippingSvcEnv)
-	warehouseSvcEnv := fmt.Sprintf("WAREHOUSE_SERVICE_ADDR=localhost:%s", grpcServer.Port())
-	log.Printf("%s", warehouseSvcEnv)
-
+	// 環境変数の設定
 	config.Envs = append(config.Envs,
 		fmt.Sprintf("GRPC_SERVER_PORT=%d", config.GRPCPort),
 		shippingSvcEnv,
 		warehouseSvcEnv,
+		publisherSvcEnv,
 	)
 
-	go func() { grpcServer.Serve() }()
-
+	// テスト対象サービスの起動
 	terminateService, err := courier.InvokeService(config)
 	if err != nil {
 		log.Printf("courier.InvokeService failed: %v", err)
 		return 1
 	}
 
+	// テスト関数の実行
 	exitCode = m.Run()
 
+	// テスト対象サービスの終了
 	if err := terminateService(); err != nil {
 		log.Printf("terminateService failed: %v", err)
 		return 1

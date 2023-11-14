@@ -5,8 +5,9 @@ package fakewarehouse_v1
 import (
 	"context"
 
-	"github.com/YoshikiShibata/courier/server/fakegrpc"
 	"google.golang.org/grpc"
+
+	"github.com/YoshikiShibata/courier/server/fakegrpc"
 
 	v1 "github.com/YoshikiShibata/courier/example/api/warehouse_v1"
 )
@@ -41,29 +42,29 @@ func (s *WarehouseServer) ClearAllResponses(
 	s.srvStub.ClearAllResponses(tid)
 }
 
-func (s *fakeWarehouseServerImpl) ListProducts(
+func (s *fakeWarehouseServerImpl) ListProductInventories(
 	ctx context.Context,
-	req *v1.ListProductsRequest,
-) (*v1.ListProductsResponse, error) {
-	return fakegrpc.HandleRequest[*v1.ListProductsResponse](s.srvStub, ctx, "ListProducts", req)
+	req *v1.ListProductInventoriesRequest,
+) (*v1.ListProductInventoriesResponse, error) {
+	return fakegrpc.HandleRequest[*v1.ListProductInventoriesResponse](s.srvStub, ctx, "ListProductInventories", req)
 }
 
-func (s *WarehouseServer) SetListProductsResponse(
+func (s *WarehouseServer) SetListProductInventoriesResponse(
 	tid string,
-	res *v1.ListProductsResponse,
+	res *v1.ListProductInventoriesResponse,
 	err error,
 ) {
-	s.srvStub.SetResponse(tid, "ListProducts", res, err)
+	s.srvStub.SetResponse(tid, "ListProductInventories", res, err)
 }
 
-func (s *WarehouseServer) SetListProductsResponseCreator(
+func (s *WarehouseServer) SetListProductInventoriesResponseCreator(
 	tid string,
-	creator func(ctx context.Context, req *v1.ListProductsRequest) (*v1.ListProductsResponse, error)) {
+	creator func(ctx context.Context, req *v1.ListProductInventoriesRequest) (*v1.ListProductInventoriesResponse, error)) {
 
 	s.srvStub.SetResponseCreator(
-		tid, "ListProducts",
+		tid, "ListProductInventories",
 		func(ctx context.Context, req any) (any, error) {
-			res, err := creator(ctx, req.(*v1.ListProductsRequest))
+			res, err := creator(ctx, req.(*v1.ListProductInventoriesRequest))
 			return res, err
 		},
 	)

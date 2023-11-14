@@ -11,6 +11,8 @@ import (
     "context"
 
     "google.golang.org/grpc"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
+
 	"github.com/YoshikiShibata/courier/server/fakegrpc"
 
 	{{.ProtoPackageImportName}} "{{.ProtoPackageImportPath}}"

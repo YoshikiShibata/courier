@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 type RPCMethod struct {
@@ -31,6 +32,10 @@ func Generate(config *TemplateConfig) {
 	packageNamePattern := regexp.MustCompile(`\*\w+\.`)
 
 	replacePackageName := func(input string) string {
+		// Don't replace input for *tmptypb.
+		if strings.HasPrefix(input, "*emptypb.") {
+			return input
+		}
 		output := packageNamePattern.ReplaceAllStringFunc(input, func(match string) string {
 			return "*" + config.ProtoPackageImportName + "."
 		})

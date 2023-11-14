@@ -2,21 +2,87 @@ syntax = "proto3";
 
 package yoshikishibata.courier.example.api.warehouse.v1;
 
-option go_package = "/warehouse_v1" ;
+option go_package = "/warehouse_v1";
 
+/**
+ * Warehouseは商品在庫の管理と出荷処理を行います。
+ * - 出荷は、Shippingサービスへ依頼されます。
+ */
 service Warehouse {
-  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse){}
-  rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse){}
+  // 扱っている商品一覧を返します。
+  rpc ListProductInventories(ListProductInventoriesRequest)
+      returns (ListProductInventoriesResponse) {}
+  // 商品を出荷します。
+  rpc ShipProduct(ShipProductRequest) returns (ShipProductResponse) {}
 }
 
-message ListProductsRequest {
+/**
+ * ProductInventoryは、扱っている商品の情報を表します。
+ */
+message ProductInventory {
+  // 商品番号
+  string number = 1;
+  // 商品名
+  string name = 2;
+  // 価格（円）
+  uint32 price = 3;
+  // 在庫数
+  uint32 quantity_available = 4;
 }
 
-message ListProductsResponse {
+/**
+ * ListProductInventoriesは、扱っている商品一覧を返します。
+ * - num_of_productsは、一覧として返す最大個数を指定します。
+ * -
+ * page_tokenには、空文字列もしくはレスポンスで返されるnext_page_tokenを設定します。
+ *   - 空文字列の場合は、商品一覧の最初から返されます。
+ * - 商品一覧は、nameのアルファベット順に昇順に返されます。
+ *
+ * [エラー]
+ * - InvalidArgument:
+ *   - num_of_productsが0
+ *   - page_tokenが不正な値
+ */
+message ListProductInventoriesRequest {
+  uint32 num_of_products = 1;
+  string page_token = 2;
 }
 
+message ListProductInventoriesResponse {
+  repeated ProductInventory product_inventories = 1;
+
+  // 商品がさらに存在しない場合、空文字列が返されます。
+  string next_page_token = 2;
+}
+
+/**
+ * ShipProductは、指定された商品を出荷します。
+ * - Shippingサービスでステータスを問い合わせるための
+ *   shipping_idを返します。
+ *
+ * [エラー]
+ * - InvalidArgument:
+ *   - order_idが空文字列
+ *   - numberが空文字列
+ *   - num_of_itemsが0
+ *   - shipping_addressが空文字列
+ * - NotFound:
+ *   - numberで指定された商品は扱っていない
+ * - FailedPrecondition:
+ *   - num_of_itemsで指定された個数の在庫がないため出荷できない。
+ */
 message ShipProductRequest {
+  // 注文番号
+  string order_id = 1;
+  // 商品番号
+  string number = 2;
+  // 個数
+  uint32 num_of_items = 3;
+  // 送付先
+  string shipping_address = 4;
 }
 
 message ShipProductResponse {
+  // 出荷番号
+  string shipping_id = 1;
 }
