@@ -15,6 +15,7 @@ import (
 	"github.com/travisjeffery/go-dynaport"
 
 	"github.com/YoshikiShibata/courier"
+	fakepublisher_v1 "github.com/YoshikiShibata/courier/example/fakeservers/publisher_v1"
 	fakeshipping_v1 "github.com/YoshikiShibata/courier/example/fakeservers/shipping_v1"
 	fakewarehouse_v1 "github.com/YoshikiShibata/courier/example/fakeservers/warehouse_v1"
 )
@@ -30,6 +31,8 @@ var (
 	fakeShippingServer  *fakeshipping_v1.ShippingServer
 	fakeWarehouseServer *fakewarehouse_v1.WarehouseServer
 	shopGRPCPort        int
+
+	fakePublisherServer *fakepublisher_v1.PublisherServer
 )
 
 func e2eCoverage(m *testing.M) (exitCode int) {
@@ -41,11 +44,17 @@ func e2eCoverage(m *testing.M) (exitCode int) {
 	// Warehouseフェイクサービスの作成
 	fakeWarehouseServer = fakewarehouse_v1.NewWarehouseServer(grpcServer.Server())
 
+	// Publisherフェイクサービスの作成
+	fakePublisherServer = fakepublisher_v1.NewPublisherServer(grpcServer.Server())
+
 	// フェイクサービスの環境変数作成（と表示）
 	shippingSvcEnv := fmt.Sprintf("SHIPPING_SERVICE_ADDR=localhost:%s", grpcServer.Port())
 	warehouseSvcEnv := fmt.Sprintf("WAREHOUSE_SERVICE_ADDR=localhost:%s", grpcServer.Port())
 	log.Printf("%s", shippingSvcEnv)
 	log.Printf("%s", warehouseSvcEnv)
+
+	publisherSvcEnv := fmt.Sprintf("PUBSUB_EMULATOR_HOST=localhost:%s", grpcServer.Port())
+	log.Printf("%s", publisherSvcEnv)
 
 	// フェイクサービスのgRPCサーバーの起動
 	go func() { grpcServer.Serve() }()
@@ -70,6 +79,7 @@ func e2eCoverage(m *testing.M) (exitCode int) {
 		fmt.Sprintf("GRPC_SERVER_PORT=%d", config.GRPCPort),
 		shippingSvcEnv,
 		warehouseSvcEnv,
+		publisherSvcEnv,
 	)
 
 	// テスト対象サービスの起動
