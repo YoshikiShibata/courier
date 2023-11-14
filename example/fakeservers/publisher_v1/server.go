@@ -5,8 +5,10 @@ package publisher_v1
 import (
 	"context"
 
-	"github.com/YoshikiShibata/courier/server/fakegrpc"
 	"google.golang.org/grpc"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/YoshikiShibata/courier/server/fakegrpc"
 
 	v1 "cloud.google.com/go/pubsub/apiv1/pubsubpb"
 )
@@ -72,13 +74,13 @@ func (s *PublisherServer) SetCreateTopicResponseCreator(
 func (s *fakePublisherServerImpl) DeleteTopic(
 	ctx context.Context,
 	req *v1.DeleteTopicRequest,
-) (*v1.Empty, error) {
-	return fakegrpc.HandleRequest[*v1.Empty](s.srvStub, ctx, "DeleteTopic", req)
+) (*emptypb.Empty, error) {
+	return fakegrpc.HandleRequest[*emptypb.Empty](s.srvStub, ctx, "DeleteTopic", req)
 }
 
 func (s *PublisherServer) SetDeleteTopicResponse(
 	tid string,
-	res *v1.Empty,
+	res *emptypb.Empty,
 	err error,
 ) {
 	s.srvStub.SetResponse(tid, "DeleteTopic", res, err)
@@ -86,7 +88,7 @@ func (s *PublisherServer) SetDeleteTopicResponse(
 
 func (s *PublisherServer) SetDeleteTopicResponseCreator(
 	tid string,
-	creator func(ctx context.Context, req *v1.DeleteTopicRequest) (*v1.Empty, error)) {
+	creator func(ctx context.Context, req *v1.DeleteTopicRequest) (*emptypb.Empty, error)) {
 
 	s.srvStub.SetResponseCreator(
 		tid, "DeleteTopic",

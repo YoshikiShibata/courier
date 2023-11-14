@@ -5,8 +5,9 @@ package fakewarehouse_v1
 import (
 	"context"
 
-	"github.com/YoshikiShibata/courier/server/fakegrpc"
 	"google.golang.org/grpc"
+
+	"github.com/YoshikiShibata/courier/server/fakegrpc"
 
 	v1 "github.com/YoshikiShibata/courier/example/api/warehouse_v1"
 )
