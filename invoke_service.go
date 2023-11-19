@@ -56,6 +56,7 @@ func InvokeService(config *Config) (func() error, error) {
 	}
 
 	// InvokeService
+	log.Printf("Invoking %s", config.ServiceBinaryPath)
 	cmd = exec.CommandContext(ctx, config.ServiceBinaryPath)
 	cmd.Env = append(cmd.Env, config.Envs...)
 	cmd.Env = append(cmd.Env, "GOCOVERDIR="+config.CoverageDir)
