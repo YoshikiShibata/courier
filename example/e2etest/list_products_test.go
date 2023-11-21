@@ -125,10 +125,11 @@ func TestListProductInventories_Normal(t *testing.T) {
 		}, nil)
 
 	// Calling and executing ListProductInventories.
-	res, err := client.ListProductInventories(ctx, &shop_v1.ListProductInventoriesRequest{
-		NumOfProducts: numOfProducts,
-		PageToken:     "",
-	})
+	res, err := client.ListProductInventories(ctx,
+		&shop_v1.ListProductInventoriesRequest{
+			NumOfProducts: numOfProducts,
+			PageToken:     "",
+		})
 
 	// Inspecting the results
 	if status.Code(err) != codes.OK {
