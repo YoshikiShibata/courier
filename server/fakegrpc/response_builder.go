@@ -10,24 +10,24 @@ import (
 )
 
 // ResponseBuilder builds a ResponseCreator which returns a sequence of response/errors.
-type ResponseBuilder[Req, Res protoreflect.ProtoMessage] struct {
+type ResponseBuilder[RQ, RS protoreflect.ProtoMessage] struct {
 	nextIndex uint32
 
-	responses []Res
+	responses []RS
 	errors    []error
 }
 
-func (rb *ResponseBuilder[Req, Res]) Creator(
+func (rb *ResponseBuilder[RQ, RS]) Creator(
 	ctx context.Context,
-	req Req,
-) (response Res, err error) {
+	req RQ,
+) (RS, error) {
 	i := int(atomic.AddUint32(&rb.nextIndex, 1) - 1)
 
 	return rb.responses[i], rb.errors[i]
 }
 
-func (rb *ResponseBuilder[Req, Res]) Append(
-	res Res,
+func (rb *ResponseBuilder[RQ, RS]) Append(
+	res RS,
 	err error,
 ) {
 	rb.responses = append(rb.responses, res)
