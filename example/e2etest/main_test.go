@@ -43,17 +43,15 @@ func e2eCoverage(m *testing.M) (exitCode int) {
 	fakeShippingServer = fakeshipping_v1.NewShippingServer(grpcServer.Server())
 	// Warehouseフェイクサービスの作成
 	fakeWarehouseServer = fakewarehouse_v1.NewWarehouseServer(grpcServer.Server())
-
 	// Publisherフェイクサービスの作成
 	fakePublisherServer = fakepublisher_v1.NewPublisherServer(grpcServer.Server())
 
 	// フェイクサービスの環境変数作成（と表示）
 	shippingSvcEnv := fmt.Sprintf("SHIPPING_SERVICE_ADDR=localhost:%s", grpcServer.Port())
 	warehouseSvcEnv := fmt.Sprintf("WAREHOUSE_SERVICE_ADDR=localhost:%s", grpcServer.Port())
+	publisherSvcEnv := fmt.Sprintf("PUBSUB_EMULATOR_HOST=localhost:%s", grpcServer.Port())
 	log.Printf("%s", shippingSvcEnv)
 	log.Printf("%s", warehouseSvcEnv)
-
-	publisherSvcEnv := fmt.Sprintf("PUBSUB_EMULATOR_HOST=localhost:%s", grpcServer.Port())
 	log.Printf("%s", publisherSvcEnv)
 
 	// フェイクサービスのgRPCサーバーの起動
