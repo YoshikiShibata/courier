@@ -124,14 +124,22 @@ func asyncWaitForServiceReady(config *Config) (ready chan struct{}) {
 
 		client := healthpb.NewHealthClient(cc)
 
+	retry:
 		for {
 			res, err := client.Check(context.Background(), &healthpb.HealthCheckRequest{
 				Service: config.ServiceName,
 			})
-			if status.Code(err) != codes.OK {
+			switch status.Code(err) {
+			case codes.OK:
+				break
+			case codes.Unavailable:
+				log.Printf("Check failed: retry every second ...")
+				time.Sleep(time.Second)
+				continue retry
+			default:
 				log.Printf("Check failed: %v", err)
 				time.Sleep(time.Second)
-				continue
+				continue retry
 			}
 
 			if res.Status != healthpb.HealthCheckResponse_SERVING {
