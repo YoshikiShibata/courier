@@ -65,7 +65,7 @@ func e2eCoverage(m *testing.M) (exitCode int) {
 	// テスト対象サービスの起動用Config設定
 	config := &courier.Config{
 		MakeDir:           "..",
-		MakeBuildTarget:   "build",
+		MakeBuildTarget:   "coverage_build",
 		ServiceBinaryPath: "bin/shop_server",
 		ServiceName:       "Shop",
 		GRPCPort:          shopGRPCPort,

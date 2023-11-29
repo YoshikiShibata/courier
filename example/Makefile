@@ -23,7 +23,7 @@ genfakes:
 	goimports -w fakeservers/publisher_v1/server.go
 
 # 手作業で指定することは想定されていません。
-build:
+coverage_build:
 	rm -fr coverage
 	mkdir coverage
 	go build -race -cover -o bin/shop_server -coverpkg=$(COVER_PKGS) .
