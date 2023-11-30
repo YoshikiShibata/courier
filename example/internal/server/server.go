@@ -105,7 +105,7 @@ func (s *shopServer) ListProductInventories(
 		codes.DeadlineExceeded:
 		return nil, err
 	case codes.InvalidArgument:
-		return nil, status.Error(codes.InvalidArgument, "page_token")
+		return nil, status.Error(codes.InvalidArgument, "page_token is invalid")
 	default:
 		return nil, status.Error(codes.Internal, err.Error())
 	}
