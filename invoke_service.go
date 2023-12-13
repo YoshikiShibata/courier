@@ -19,6 +19,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
+// Config defines make-based configuration.
 type Config struct {
 	MakeDir           string
 	MakeBuildTarget   string
