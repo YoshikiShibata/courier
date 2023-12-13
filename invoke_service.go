@@ -29,6 +29,10 @@ type Config struct {
 	Envs              []string
 	Verbose           bool
 	CoverageDir       string
+
+	// ServiceReadyProbe is a customer function which probes the service
+	// until the service is ready.
+	ServiceReadyProbe func(*Config)
 }
 
 func InvokeService(config *Config) (func() error, error) {
@@ -112,6 +116,14 @@ func InvokeService(config *Config) (func() error, error) {
 
 func asyncWaitForServiceReady(config *Config) (ready chan struct{}) {
 	ready = make(chan struct{})
+
+	if config.ServiceReadyProbe != nil {
+		go func() {
+			config.ServiceReadyProbe(config)
+			close(ready)
+		}()
+		return ready
+	}
 
 	go func() {
 		clientOptions := []grpc.DialOption{
