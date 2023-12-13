@@ -85,7 +85,7 @@ func InvokeSimpleService(config *SimpleConfig) (func() error, error) {
 
 		// The invoked service may not handle TERM signal gracefully and
 		// just terminated with the sinal. So it should be treated as ok.
-		if err != nil && string.Contains(err.Error(), "signal: terminated") {
+		if err != nil && strings.Contains(err.Error(), "signal: terminated") {
 			return nil
 		}
 		return err
