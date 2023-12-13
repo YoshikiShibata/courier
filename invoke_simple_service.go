@@ -51,10 +51,6 @@ func InvokeSimpleService(config *SimpleConfig) (func() error, error) {
 		cancel()
 		return nil, fmt.Errorf("cmd.Start() failed: %w", err)
 	}
-	if err := cmd.Wait(); err != nil {
-		cancel()
-		return nil, fmt.Errorf("cmd.Wait() failed: %w", err)
-	}
 
 	exitedErr := make(chan error)
 	go func() {
@@ -86,6 +82,12 @@ func InvokeSimpleService(config *SimpleConfig) (func() error, error) {
 		err := <-exitedErr
 
 		cancel()
+
+		// The invoked service may not handle TERM signal gracefully and
+		// just terminated with the sinal. So it should be treated as ok.
+		if err != nil && string.Contains(err.Error(), "signal: terminated") {
+			return nil
+		}
 		return err
 	}, nil
 }
