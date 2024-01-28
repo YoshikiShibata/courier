@@ -11,7 +11,8 @@ option go_package = "/shop_v1";
  * - サンプルサービスとしては、認証機能は定義していませんので、
  *   Unauthenticatedエラーは返されません。
  * -
- * すべてのエンドポイントで、DeadlineExceededおよびCanceledのエラーが返されます。
+ * すべてのエンドポイントで、DeadlineExceededおよびCanceledのエラーが返さ
+ * れます。
  * - Internalエラーは、サービス側の問題を示しており、明記されていません。
  */
 service Shop {
