@@ -38,18 +38,23 @@ var (
 func e2eCoverage(m *testing.M) (exitCode int) {
 	// フェイクサービス用のgRPCサーバ—
 	grpcServer := fakegrpc.NewGRPCServer()
+	server := grpcServer.Server()
+	port := grpcServer.Port()
 
 	// Shippingフェイクサービスの作成
-	fakeShippingServer = fakeshipping_v1.NewShippingServer(grpcServer.Server())
+	fakeShippingServer = fakeshipping_v1.NewShippingServer(server)
 	// Warehouseフェイクサービスの作成
-	fakeWarehouseServer = fakewarehouse_v1.NewWarehouseServer(grpcServer.Server())
+	fakeWarehouseServer = fakewarehouse_v1.NewWarehouseServer(server)
 	// Publisherフェイクサービスの作成
-	fakePublisherServer = fakepublisher_v1.NewPublisherServer(grpcServer.Server())
+	fakePublisherServer = fakepublisher_v1.NewPublisherServer(server)
 
 	// フェイクサービスの環境変数作成（と表示）
-	shippingSvcEnv := fmt.Sprintf("SHIPPING_SERVICE_ADDR=localhost:%s", grpcServer.Port())
-	warehouseSvcEnv := fmt.Sprintf("WAREHOUSE_SERVICE_ADDR=localhost:%s", grpcServer.Port())
-	publisherSvcEnv := fmt.Sprintf("PUBSUB_EMULATOR_HOST=localhost:%s", grpcServer.Port())
+	shippingSvcEnv :=
+		fmt.Sprintf("SHIPPING_SERVICE_ADDR=localhost:%s", port)
+	warehouseSvcEnv :=
+		fmt.Sprintf("WAREHOUSE_SERVICE_ADDR=localhost:%s", port)
+	publisherSvcEnv :=
+		fmt.Sprintf("PUBSUB_EMULATOR_HOST=localhost:%s", port)
 	log.Printf("%s", shippingSvcEnv)
 	log.Printf("%s", warehouseSvcEnv)
 	log.Printf("%s", publisherSvcEnv)
