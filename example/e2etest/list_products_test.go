@@ -141,7 +141,8 @@ func TestListProductInventories_Normal(t *testing.T) {
 	}
 
 	// Inspecting each returned ProductInventory
-	wantProductInventories := make([]*shop_v1.ProductInventory, 0, len(warehouseProducts))
+	wantProductInventories := make([]*shop_v1.ProductInventory,
+		0, len(warehouseProducts))
 	for _, p := range warehouseProducts {
 		wantProductInventories = append(wantProductInventories,
 			&shop_v1.ProductInventory{
