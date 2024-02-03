@@ -153,7 +153,11 @@ func TestListProductInventories_Normal(t *testing.T) {
 	}
 
 	opts := cmpopts.IgnoreUnexported(shop_v1.ProductInventory{})
-	if diff := cmp.Diff(res.ProductInventories, wantProductInventories, opts); diff != "" {
+	if diff := cmp.Diff(
+		res.ProductInventories,
+		wantProductInventories,
+		opts,
+	); diff != "" {
 		t.Errorf("(-want, +got)\n%s", diff)
 	}
 }
