@@ -19,7 +19,8 @@ func newShopClient(t *testing.T) shop_v1.ShopClient {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	cc, err := grpc.Dial(fmt.Sprintf("localhost:%d", shopGRPCPort), clientOptions...)
+	cc, err := grpc.Dial(fmt.Sprintf("localhost:%d", shopGRPCPort),
+		clientOptions...)
 	if err != nil {
 		t.Fatalf("grpc.Dial failed: %v", err)
 	}

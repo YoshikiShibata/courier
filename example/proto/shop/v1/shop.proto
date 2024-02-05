@@ -10,8 +10,8 @@ option go_package = "/shop_v1";
  * [共通] すべてのエンドポイントに対して共通の振る舞いです。
  * - サンプルサービスとしては、認証機能は定義していませんので、
  *   Unauthenticatedエラーは返されません。
- * -
- * すべてのエンドポイントで、DeadlineExceededおよびCanceledのエラーが返されます。
+ * - すべてのエンドポイントで、DeadlineExceededおよびCanceledのエラーが
+ *   返されます。
  * - Internalエラーは、サービス側の問題を示しており、明記されていません。
  */
 service Shop {
@@ -40,8 +40,9 @@ message ProductInventory {
  * ListProductInventoriesは、扱っている商品の一覧を返します。
  * - num_of_productsは、一覧として返す最大個数を指定します。
  *
- * page_tokenには、空文字列もしくはレスポンスで返されるnext_page_tokenを設定します。
- *   - 空文字列の場合は、商品一覧の最初から返されます。
+ * page_tokenには、空文字列もしくはレスポンスで返されるnext_page_tokenを
+ * 設定します。
+ * - 空文字列の場合は、商品一覧の最初から返されます。
  * - 商品一覧は、nameのアルファベット順に昇順に返されます。
  *
  * [エラー]

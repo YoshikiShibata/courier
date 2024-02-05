@@ -20,7 +20,9 @@ import (
 	"github.com/YoshikiShibata/courier/tid"
 )
 
-func TestListProductInventories_InvalidArgumentNumOfProducts(t *testing.T) {
+func TestListProductInventories_InvalidArgumentNumOfProducts(
+	t *testing.T,
+) {
 	t.Parallel()
 
 	client := newShopClient(t)
@@ -94,7 +96,8 @@ func TestListProductInventories_CanceledAndDeadlineExceeded(t *testing.T) {
 
 		// Inspecting the result
 		if status.Code(err) != tc.code {
-			t.Errorf("ListProductInventories returned %v, want %v", err, tc.code)
+			t.Errorf("ListProductInventories returned %v, want %v",
+				err, tc.code)
 		}
 	}
 }
@@ -107,7 +110,8 @@ func TestListProductInventories_Normal(t *testing.T) {
 
 	// Preparing inventory at the Warehouse.
 	const numOfProducts = 10
-	warehouseProducts := make([]*warehouse_v1.ProductInventory, numOfProducts)
+	warehouseProducts := make([]*warehouse_v1.ProductInventory,
+		numOfProducts)
 	for i := 0; i < numOfProducts; i++ {
 		warehouseProducts[i] = &warehouse_v1.ProductInventory{
 			Number:            uuid.NewString(),
@@ -137,7 +141,8 @@ func TestListProductInventories_Normal(t *testing.T) {
 	}
 
 	// Inspecting each returned ProductInventory
-	wantProductInventories := make([]*shop_v1.ProductInventory, 0, len(warehouseProducts))
+	wantProductInventories := make([]*shop_v1.ProductInventory,
+		0, len(warehouseProducts))
 	for _, p := range warehouseProducts {
 		wantProductInventories = append(wantProductInventories,
 			&shop_v1.ProductInventory{
@@ -149,7 +154,11 @@ func TestListProductInventories_Normal(t *testing.T) {
 	}
 
 	opts := cmpopts.IgnoreUnexported(shop_v1.ProductInventory{})
-	if diff := cmp.Diff(res.ProductInventories, wantProductInventories, opts); diff != "" {
+	if diff := cmp.Diff(
+		res.ProductInventories,
+		wantProductInventories,
+		opts,
+	); diff != "" {
 		t.Errorf("(-want, +got)\n%s", diff)
 	}
 }
