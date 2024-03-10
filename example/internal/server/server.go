@@ -87,14 +87,13 @@ func (s *shopServer) ListProductInventories(
 	ctx context.Context,
 	req *shop_v1.ListProductInventoriesRequest,
 ) (*shop_v1.ListProductInventoriesResponse, error) {
-	numOfProducts := req.GetNumOfProducts()
-	if numOfProducts == 0 {
-		return nil, status.Error(codes.InvalidArgument, "num_of_products")
+	if err := req.ValidateAll(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	res, err := s.warehouseClient.ListProductInventories(ctx,
 		&warehouse_v1.ListProductInventoriesRequest{
-			NumOfProducts: numOfProducts,
+			NumOfProducts: req.NumOfProducts,
 			PageToken:     req.GetPageToken(),
 		})
 
