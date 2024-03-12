@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	"github.com/kelseyhightower/envconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -50,7 +51,9 @@ func main() {
 	warehouseClient := warehouse_v1.NewWarehouseClient(warehouseCC)
 
 	grpcOpts := []grpc.ServerOption{
-		grpc_middleware.WithUnaryServerChain(tid.NewGRPCHeaderPropagator()),
+		grpc_middleware.WithUnaryServerChain(
+			tid.NewGRPCHeaderPropagator(),
+			grpc_validator.UnaryServerInterceptor()),
 	}
 
 	grpcServer, err := server.NewGRPCServer(
