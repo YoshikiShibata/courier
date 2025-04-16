@@ -1,6 +1,6 @@
 module github.com/YoshikiShibata/courier
 
-go 1.20
+go 1.24
 
 require (
 	cloud.google.com/go/pubsub v1.34.0
