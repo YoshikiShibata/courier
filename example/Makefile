@@ -7,7 +7,7 @@ all: compile genfakes
 
 .PHONY: compile
 compile:
-	protoc proto/*/v1//*.proto \
+	protoc proto/*/v1/*.proto \
 		-I $(VALIDATE_PROTO_PATH) \
 		--go_out=./api \
 		--go-grpc_out=./api \
