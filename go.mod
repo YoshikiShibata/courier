@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	cloud.google.com/go/pubsub v1.34.0
+	github.com/envoyproxy/protoc-gen-validate v1.0.4
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0

@@ -1,17 +1,19 @@
 COURIER=github.com/YoshikiShibata/courier
 COVER_PKGS=$(COURIER)/example,$(COURIER)/example/internal/...
+VALIDATE_PROTO_PATH=$(HOME)/tools/protoc-gen-validate/
 SERVICES = shipping_v1 warehouse_v1 publisher_v1
-
 
 all: compile genfakes
 
 .PHONY: compile
 compile:
 	protoc proto/*/v1/*.proto \
+		-I $(VALIDATE_PROTO_PATH) \
 		--go_out=./api \
 		--go-grpc_out=./api \
 		--go_opt=paths=import \
 		--go-grpc_opt=paths=import \
+		--validate_out="lang=go:./api" \
 		--proto_path=.
 
 .PHONY: genfakes
