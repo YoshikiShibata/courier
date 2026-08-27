@@ -30,6 +30,22 @@ func New(ctx context.Context) (string, context.Context) {
 	return tid, metadata.AppendToOutgoingContext(ctx, courierTestingIDHeader, tid)
 }
 
+// NewAlways returns a newly generated TID(testing ID) and a context which
+// contains the TID. Unlike New, NewAlways always issues a new TID even if
+// ctx already contains one; any existing TID in the outgoing metadata is
+// replaced.
+func NewAlways(ctx context.Context) (string, context.Context) {
+	tid := uuid.NewString()
+
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok {
+		md = md.Copy()
+		md.Set(courierTestingIDHeader, tid)
+		return tid, metadata.NewOutgoingContext(ctx, md)
+	}
+	return tid, metadata.AppendToOutgoingContext(ctx, courierTestingIDHeader, tid)
+}
+
 // Extract extracts an tid from the context.
 func Extract(ctx context.Context) string {
 	md, ok := metadata.FromIncomingContext(ctx)
