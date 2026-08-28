@@ -1,7 +1,7 @@
-# Tutorial: Using the `server/fakegrpc` and `tid` Packages
+# Tutorial: Using the `server/fakegrpc`, `tid`, and `sync` Packages
 
-This tutorial walks through the two core packages of courier, using the
-sample project under `example/` as the running reference.
+This tutorial walks through the three core packages of courier, using
+the sample project under `example/` as the running reference.
 
 - `github.com/YoshikiShibata/courier/server/fakegrpc`
   A library for standing up gRPC dependencies as **fake servers** and
@@ -10,10 +10,16 @@ sample project under `example/` as the running reference.
   A library that issues a **Testing ID (TID)** and propagates it through
   gRPC metadata so that parallel E2E tests do not interfere with each
   other's fake-server configurations.
+- `github.com/YoshikiShibata/courier/sync`
+  Test-oriented lock primitives that acquire multiple locks **atomically
+  (all-or-nothing)**. Two flavors are provided: one that coordinates
+  goroutines within a single process (`ProcessLocalMultiLock`) and one
+  that coordinates separate processes (`ProcessSharedMultiLock`).
 
 The `example/` directory contains a Shop service (the system under test)
 that depends on three gRPC services — Shipping, Warehouse, and Publisher —
-and serves as a complete reference for both packages.
+and serves as a complete reference for the `server/fakegrpc` and `tid`
+packages.
 
 ---
 
@@ -365,7 +371,135 @@ test registered.
 
 ---
 
-## 4. Common Pitfalls
+## 4. The `sync` Package
+
+The `sync` package provides primitives that acquire multiple locks
+**atomically**: "wait until every requested lock is available, then grab
+them all at once; release them all together." This all-or-nothing
+semantics eliminates the hold-and-wait chains that appear when several
+tests contend for several shared resources at the same time (test A
+holds lock X while waiting for Y, test B holds Y while waiting for X,
+and so on).
+
+### 4.1 Building Lock Requests
+
+Both lock types consume the same `LockRequest`. Two helpers keep the
+call sites short:
+
+```go
+import cs "github.com/YoshikiShibata/courier/sync"
+
+reqs := []cs.LockRequest{
+    cs.Shared("productInventory"),   // read-only intent
+    cs.Exclusive("orderTable"),      // write intent
+}
+```
+
+- `Shared(name)` — coexists with other Shared holders, excludes Exclusive.
+- `Exclusive(name)` — excludes every other holder.
+- The name is any string that identifies the shared resource; tests
+  simply agree on it.
+
+### 4.2 `ProcessLocalMultiLock` — Coordinating Goroutines in One Process
+
+Use this to coordinate goroutines that run inside the **same test
+binary** (subtests, table-driven parallel cases). It does not interact
+with any other OS process.
+
+```go
+import (
+    "testing"
+
+    cs "github.com/YoshikiShibata/courier/sync"
+)
+
+func TestUpdateOrder(t *testing.T) {
+    t.Parallel()
+
+    ml := cs.NewProcessLocalMultiLock(t,
+        cs.Shared("productInventory"),
+        cs.Exclusive("orderTable"),
+    )
+    ml.AcquireAll(t)   // blocks until *every* lock is available, then grabs them
+    // Release is auto-registered via t.Cleanup; call ml.ReleaseAll(t) if
+    // you want to release earlier.
+
+    // ... test body ...
+}
+```
+
+**Highlights**
+
+- `AcquireAll` grabs every lock only at the moment they are all
+  simultaneously available. Otherwise the goroutine sleeps on a
+  `sync.Cond` — no busy loop.
+- The `LockRequest`s can be passed in any order (they are sorted by
+  name internally).
+- Release is registered on `t.Cleanup`, so the locks cannot leak past
+  the test.
+
+### 4.3 `ProcessSharedMultiLock` — Coordinating Separate Processes
+
+`go test ./...` compiles each package into its own test binary and
+runs them as independent processes in parallel. When several test
+packages touch the same shared resource (a database table, an external
+emulator, a tempdir file), they must coordinate **across processes**.
+`ProcessSharedMultiLock` provides this by way of `flock(2)`.
+
+```go
+func TestSomethingSharedAcrossPackages(t *testing.T) {
+    ml := cs.NewProcessSharedMultiLock(t,
+        cs.Exclusive("integration_db"),
+    )
+    ml.AcquireAll(t)   // blocks in the kernel if another process holds it
+
+    // ... test body ...
+}
+```
+
+**Highlights**
+
+- Lock files are auto-created at `os.TempDir()/lock_file_<name>`. Two
+  tests in different packages that use the same name will contend.
+- Under the hood, a well-known coordinator lock file is taken briefly
+  while the manager tries non-blocking flocks on each target. If any
+  target is unavailable, the manager releases everything and then does
+  a **blocking flock** on the failing target - so a waiter sleeps in
+  the kernel and is woken up the moment the holder releases, with no
+  polling interval.
+- Supported on macOS and Linux (flock-based; not available on Windows).
+
+### 4.4 Which One to Use
+
+| Case | Lock |
+| --- | --- |
+| Coordinate parallel subtests inside a single test package | `ProcessLocalMultiLock` |
+| Coordinate tests across different test packages (separate processes) | `ProcessSharedMultiLock` |
+| Not sure / worst case | `ProcessSharedMultiLock` |
+
+`ProcessSharedMultiLock` carries a small amount of `flock` syscall
+overhead. When the coordination is clearly bounded to one process, the
+lighter `ProcessLocalMultiLock` is preferable.
+
+### 4.5 Shared Design Principles
+
+Both types guarantee the following:
+
+- **All-or-nothing acquisition**: `AcquireAll` waits with **zero locks
+  held** until it can grab every requested lock. Nothing is held while
+  waiting for something else, so hold-and-wait chains cannot form.
+- **RWMutex-style semantics**: `Shared` requests can coexist for the
+  same name; `Exclusive` requests exclude every other holder.
+- **Automatic release via `t.Cleanup`**: locks are always released when
+  the test finishes; `ReleaseAll(t)` is idempotent and safe to call
+  explicitly for early release.
+- **Caller location in logs**: `runtime.Caller` is used so that
+  wait/acquire/release log lines carry the test's source location -
+  handy when investigating a stuck test.
+
+---
+
+## 5. Common Pitfalls
 
 - **Panic: `Response for <tid>:<RPC> has not been set yet`**
   - The service under test forgot to install
