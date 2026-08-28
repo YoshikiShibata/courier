@@ -1,6 +1,6 @@
-# チュートリアル: `server/fakegrpc` と `tid` パッケージの使い方
+# チュートリアル: `server/fakegrpc` / `tid` / `sync` パッケージの使い方
 
-このチュートリアルでは、courierに含まれる次の2つのパッケージの使い方を、
+このチュートリアルでは、courierに含まれる次の3つのパッケージの使い方を、
 `example/` ディレクトリの実例とともに説明します。
 
 - `github.com/YoshikiShibata/courier/server/fakegrpc`
@@ -9,10 +9,14 @@
 - `github.com/YoshikiShibata/courier/tid`
   E2Eテストが並列に走っても互いのフェイク設定が混線しないようにするための
   **Testing ID(TID)** を発行し、gRPCメタデータで伝搬させるためのライブラリ。
+- `github.com/YoshikiShibata/courier/sync`
+  複数のロックを **原子的に (all-or-nothing で)** 取得するテスト用ロック
+  プリミティブ。同一プロセス内の goroutine 間 (`ProcessLocalMultiLock`) と、
+  異なるプロセス間 (`ProcessSharedMultiLock`) の2種類を提供します。
 
 `example/` ディレクトリは、Shopサービス(テスト対象)がShipping/Warehouse/Publisherの
-3つのgRPCサービスに依存する構成になっており、この2パッケージの使い方の完全な
-リファレンス実装になっています。
+3つのgRPCサービスに依存する構成になっており、`server/fakegrpc` と `tid` パッケージの
+完全なリファレンス実装になっています。
 
 ---
 
@@ -356,7 +360,118 @@ func TestXxx(t *testing.T) {
 
 ---
 
-## 4. よくあるハマりどころ
+## 4. `sync` パッケージ
+
+複数のロックを **原子的に** 取得するためのプリミティブを提供します。
+「必要なロックが揃うまで何も掴まない → 揃ったら一気に全部掴む → 使い終わったら全部離す」
+という all-or-nothing のセマンティクスにより、複数のテストが複数の共有リソースを
+待ち合うときに起きがちな hold-and-wait 連鎖 (テストA がロックX を持ったまま Y を待ち、
+テストB は Y を持ったまま X を待つ、といった連鎖的な遅延) を根本から排除します。
+
+### 4.1 ロック要求の作り方
+
+どちらのロックも同じ `LockRequest` を受け取ります。ヘルパー関数で簡潔に書けます。
+
+```go
+import cs "github.com/YoshikiShibata/courier/sync"
+
+reqs := []cs.LockRequest{
+    cs.Shared("productInventory"),   // 読み取り目的
+    cs.Exclusive("orderTable"),      // 書き込み目的
+}
+```
+
+- `Shared(name)` — 他の Shared と同居可、Exclusive とは排他。
+- `Exclusive(name)` — 他のロックとは一切排他。
+- 名前はテスト間の合意でつけた任意の文字列 (通常は「守りたい共有リソースの識別子」)。
+
+### 4.2 `ProcessLocalMultiLock` — 同一プロセス内の goroutine 間ロック
+
+同じテストバイナリ内で走る goroutine (サブテストやテーブルドリブンの子テストなど)
+の間で調停したいときに使います。プロセス外の他プロセスとは干渉しません。
+
+```go
+import (
+    "testing"
+
+    cs "github.com/YoshikiShibata/courier/sync"
+)
+
+func TestUpdateOrder(t *testing.T) {
+    t.Parallel()
+
+    ml := cs.NewProcessLocalMultiLock(t,
+        cs.Shared("productInventory"),
+        cs.Exclusive("orderTable"),
+    )
+    ml.AcquireAll(t)   // 全ロックが取れるまで待つ (途中で1つも掴まない)
+    // 解放は t.Cleanup で自動。明示的に離したければ ml.ReleaseAll(t)。
+
+    // ... テスト本体 ...
+}
+```
+
+**特徴:**
+- `AcquireAll` は「全ロックが同時に取得可能になった瞬間だけ」まとめて掴みます。
+  取れない場合は goroutine ごと `sync.Cond` で寝るので busy-loop しません。
+- 順序を意識せず好きな順に `LockRequest` を渡して OK (内部で名前ソートされる)。
+- `t.Cleanup` で解放が自動登録されるので、テスト終了時のリーク心配なし。
+
+### 4.3 `ProcessSharedMultiLock` — プロセス跨ぎのロック
+
+`go test ./...` は各パッケージのテストバイナリを別プロセスとして並列実行します。
+同じ共有リソース (DBのテーブル、外部エミュレータの状態、tempdir 上のファイルなど) を
+複数パッケージのテストが触る場合、プロセス跨ぎの調停が必要になります。
+`ProcessSharedMultiLock` は `flock(2)` を用いてこれを実現します。
+
+```go
+func TestSomethingSharedAcrossPackages(t *testing.T) {
+    ml := cs.NewProcessSharedMultiLock(t,
+        cs.Exclusive("integration_db"),
+    )
+    ml.AcquireAll(t)   // 他プロセスが持っていればカーネル待ち (event-driven)
+
+    // ... テスト本体 ...
+}
+```
+
+**特徴:**
+- ロックファイルは `os.TempDir()/lock_file_<name>` に自動生成。同名なら
+  異なるパッケージ・異なるバイナリのテスト間でも競合します。
+- 全ロックが揃うまで待つ実装として、内部で「調停ロック」を挟んで
+  ノンブロッキング flock を試し、失敗した対象1つに対してブロッキング flock
+  で待機します。これにより、10ms 間隔のポーリングなしに「他プロセスが
+  解放した瞬間」にカーネルから起こされます。
+- macOS / Linux で動作します (flock ベースのため Windows は非対応)。
+
+### 4.4 2つのロックの使い分け
+
+| ケース | 使うロック |
+| --- | --- |
+| 同じテストパッケージ内の並列サブテスト間の調停 | `ProcessLocalMultiLock` |
+| 異なるテストパッケージ (別プロセス) 間の調停 | `ProcessSharedMultiLock` |
+| 両方の可能性がある(=最悪ケースを想定) | `ProcessSharedMultiLock` |
+
+`ProcessSharedMultiLock` は `flock` の syscall コストが少し乗るので、
+明らかにプロセス内に閉じるケースは `ProcessLocalMultiLock` の方が軽量です。
+
+### 4.5 共通の設計方針
+
+どちらも次の性質を持ちます。
+
+- **All-or-nothing 取得**: `AcquireAll` は全ロックが揃うまで **一つも掴まずに** 待ちます。
+  取得済みのロックを保持したまま次のロックを待つ「hold-and-wait」型ではないため、
+  デッドロックや連鎖的な遅延が起きません。
+- **RWMutex 相当のセマンティクス**: 同じ名前に対し `Shared` は同居可、
+  `Exclusive` は排他。
+- **`t.Cleanup` による自動解放**: テスト終了時に必ず解放されます。
+  `ReleaseAll(t)` はべき等なので途中で明示的に呼んでも安全。
+- **呼び出し元の位置をログに残す**: `runtime.Caller` を使い、
+  待機/取得/解放のログにテストの位置を出力します。デッドロック調査に有用。
+
+---
+
+## 5. よくあるハマりどころ
 
 - **`Response for <tid>:<RPC> has not been set yet` で panic する**
   - テスト対象サービス側で `tid.NewGRPCHeaderPropagator()` を組み込み忘れている。
