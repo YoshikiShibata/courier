@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package yoshikishibata.courier.example.api.shop.v1;
 
+import "validate/validate.proto";
+
 option go_package = "/shop_v1";
 
 /**
@@ -51,7 +53,7 @@ message ProductInventory {
  *   - page_tokenが不正な値
  */
 message ListProductInventoriesRequest {
-  uint32 num_of_products = 1;
+  uint32 num_of_products = 1 [(validate.rules).uint32.gte = 1];
   string page_token = 2;
 }
 
